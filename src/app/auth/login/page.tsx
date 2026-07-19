@@ -38,7 +38,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* ── Panneau gauche : illustration / branding ── */}
       <div className="md:lg:flex lg:w-[52%] flex-col justify-between p-8 relative overflow-hidden rounded-b-xl md:rounded-r-xl round"
-        style={{ background: 'linear-gradient(145deg, #001c37 0%, #02286fef 40%, #001c37 100%)' }}>
+        style={{ background: 'linear-gradient(145deg, #9cf4f7 0%, #02286fef 40%, #001c37 100%)' }}>
         {/* Formes décoratives */}
         <div className="absolute top-[-80px] right-[-80px] w-[400px] h-[400px] rounded-full opacity-10"
           style={{ background: 'radial-gradient(circle, #818cf8, transparent)' }} />
@@ -52,7 +52,7 @@ export default function LoginPage() {
           <div className="flex justify-center flex-col items-center gap-3 ">
             <img
               src="/icon-192.png"
-              alt="FS Archive logo"
+              alt="campus-edu logo"
               width={292}
               height={292}
               className="rounded-xl object-contain"
@@ -69,7 +69,7 @@ export default function LoginPage() {
               <span className="text-white font-display text-2xl font-bold leading-tight text-balance" style={{ color: '#a5b4fc' }}>en un clic, partout.</span>
             </h1>
             <br />
-            <p className="text-indigo-200 text-lg leading-relaxed max-w-md space">
+            <p className="text-indigo-200 text-lg leading-relaxed max-w-xxl space">
               Accédez aux supports de cours, sujets d'examen et guides pédagogiques en quelques secondes.
             </p>
           </div>
@@ -203,23 +203,6 @@ export default function LoginPage() {
               ) : 'Se connecter'}
             </button>
           </form>
-
-          {/* Hint comptes test */}
-          <div className="mt-8 p-4 rounded-xl text-xs space-y-1"
-            style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
-            <p className="font-medium text-gray-600 mb-2">Consulter la plateforme sans avoir de compte :</p>
-            {[
-              { role: 'Acceder sans compte', mat: '20FS0001', pwd: '20FS0001' },
-            ].map(({ role, mat, pwd }) => (
-              <button key={role}
-                onClick={() => { setMatricule(mat); setPassword(pwd) }}
-                className="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white transition-colors flex justify-between"
-                style={{ color: 'var(--text-2)' }}>
-                <span className="font-medium" style={{ color: 'var(--brand)' }}>{role}</span>
-                <span style={{ fontFamily: 'var(--font-mono)' }}>{mat}</span>
-              </button>
-            ))}
-          </div>
 
         </div>
       </div>
