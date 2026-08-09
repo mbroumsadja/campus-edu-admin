@@ -8,12 +8,19 @@ export type Semestre = 'S1'|'S2'|'S3'|'S4'|'S5'|'S6'|'S7'|'S8'|'S9'|'S10'
 
 // ── Entités ────────────────────────────────────────────────────────
 
+export interface Ecole {
+  id:      number
+  ecole:   string
+  actif?:  boolean
+}
+
 export interface Filiere {
   id:          number
   code:        string
   nom:         string
   departement: string
   actif:       boolean
+  ecole_id?:   number
   ues?:        UE[]
 }
 
@@ -55,6 +62,32 @@ export interface Cours {
   ue?:                UE
   enseignant?:        Pick<Utilisateur, 'id'|'nom'|'prenom'>
   createdAt:          string
+}
+
+export interface SearchDocumentItem {
+  id: number
+  type_contenu: 'cours' | 'sujet_examen'
+  nom: string
+  titre?: string
+  type: string
+  lien_telechargement: string
+  taille_octets: number | null
+  taille_lisible: string | null
+  niveau: Niveau | null
+  filiere_code: string | null
+  filiere_nom: string | null
+  ecole_nom: string | null
+  code_ue: string | null
+  intitule_ue: string | null
+  annee_academique: string | null
+  annee: number | string | null
+  telechargements: number
+  disponible: boolean
+  deja_telecharge: boolean
+  statut?: 'en_attente' | 'publie' | 'archive'
+  vues?: number
+  ue?: UE
+  enseignant?: Pick<Utilisateur, 'id'|'nom'|'prenom'>
 }
 
 export interface Sujet {

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
 import {
-  LayoutDashboard, BookOpen, FileText, Users, GitBranch, User, LogOut, ChevronDown, Menu, X
+  LayoutDashboard, BookOpen, FileText, Users, GitBranch, Building2, User, LogOut, ChevronDown, Menu, X
 } from 'lucide-react'
 
 const roleLabel = { etudiant: 'Étudiant', enseignant: 'Enseignant', admin: 'Administrateur' }
@@ -19,6 +19,7 @@ const navMain = [
 
 const navAdmin = [
   { href: '/admin/users', label: 'Utilisateurs', icon: Users },
+  { href: '/admin/ecoles', label: 'Écoles', icon: Building2 },
   { href: '/admin/filieres', label: 'Filières & UEs', icon: GitBranch },
 ]
 

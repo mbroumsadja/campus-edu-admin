@@ -7,7 +7,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import Cookies from 'js-cookie'
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api').replace(/\/+$/, '')
 
 // ── Instance principale ────────────────────────────────────────────
 export const api = axios.create({
@@ -129,6 +129,34 @@ export const authService = {
     api.post('/auth/refresh', { refreshToken }),
 }
 
+export const searchService = {
+  documents: async (params?: Record<string, unknown>) => {
+    const response = await api.get('/search/documents', { params })
+    const payload = response.data ?? {}
+    const items = Array.isArray(payload?.data)
+      ? payload.data
+      : Array.isArray(payload?.documents)
+        ? payload.documents
+        : Array.isArray(payload)
+          ? payload
+          : []
+
+    return {
+      data: {
+        data: items,
+        pagination: payload?.pagination ?? {
+          total: items.length,
+          page: 1,
+          limit: items.length,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false,
+        },
+      },
+    }
+  },
+}
+
 export const coursService = {
   list:       (params?: Record<string, unknown>) => api.get('/cours', { params }),
   get:        (id: number) => api.get(`/cours/${id}`),
@@ -161,6 +189,14 @@ export const filieresService = {
   create:   (data: unknown) => api.post('/filieres', data),
   creerUE:  (filiereId: number, data: unknown) =>
     api.post(`/filieres/${filiereId}/ues`, data),
+}
+
+export const ecolesService = {
+  list:   () => api.get('/ecoles'),
+  get:    (id: number) => api.get(`/ecoles/${id}`),
+  create: (data: unknown) => api.post('/ecoles', data),
+  update: (id: number, data: unknown) => api.put(`/ecoles/${id}`, data),
+  delete: (id: number) => api.delete(`/ecoles/${id}`),
 }
 
 export const usersService = {

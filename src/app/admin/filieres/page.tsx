@@ -2,8 +2,8 @@
 // src/app/admin/filieres/page.tsx
 // Gestion des filières et unités d'enseignement
 
-import { useState } from 'react'
-import { filieresService } from '@/lib/api'
+import { useEffect, useState } from 'react'
+import { ecolesService, filieresService } from '@/lib/api'
 import { useQuery } from '@/hooks/useQuery'
 import AppShell from '@/components/layout/AppShell'
 import {
@@ -16,7 +16,7 @@ import {
   BookOpen, GraduationCap, Hash
 } from 'lucide-react'
 import { AxiosError } from 'axios'
-import type { Filiere, UE } from '@/types'
+import type { Ecole, Filiere, UE } from '@/types'
 
 // ── Couleurs par niveau ───────────────────────────────────────────
 const NIVEAU_STYLE: Record<string, { bg: string; color: string }> = {
@@ -34,15 +34,33 @@ function CreateFiliereModal({ open, onClose, onSuccess }: {
   const [code,        setCode]        = useState('')
   const [nom,         setNom]         = useState('')
   const [departement, setDepartement] = useState('')
+  const [ecoleId,     setEcoleId]     = useState('')
+  const [ecoles,      setEcoles]      = useState<Ecole[]>([])
   const [loading,     setLoading]     = useState(false)
   const [error,       setError]       = useState('')
 
+  useEffect(() => {
+    ecolesService.list()
+      .then(r => setEcoles((r.data as { data: Ecole[] }).data))
+      .catch(() => {
+        // silence error, la validation de création sera gérée côté serveur
+      })
+  }, [])
+
   const handleSubmit = async () => {
-    if (!code.trim() || !nom.trim()) { setError('Code et nom sont obligatoires'); return }
+    if (!code.trim() || !nom.trim() || !ecoleId) {
+      setError('Code, nom et école sont obligatoires')
+      return
+    }
     setLoading(true); setError('')
     try {
-      await filieresService.create({ code: code.trim().toUpperCase(), nom: nom.trim(), departement: departement.trim() })
-      setCode(''); setNom(''); setDepartement('')
+      await filieresService.create({
+        code: code.trim().toUpperCase(),
+        nom: nom.trim(),
+        departement: departement.trim(),
+        ecole_id: parseInt(ecoleId, 10),
+      })
+      setCode(''); setNom(''); setDepartement(''); setEcoleId('')
       onSuccess()
     } catch (err) {
       const e = err as AxiosError<{ message: string }>
@@ -65,6 +83,14 @@ function CreateFiliereModal({ open, onClose, onSuccess }: {
             {error}
           </div>
         )}
+        <FormField label="École" required>
+          <Select
+            value={ecoleId}
+            onChange={e => setEcoleId(e.target.value)}
+            placeholder="Sélectionnez une école"
+            options={ecoles.map(ecole => ({ value: String(ecole.id), label: ecole.ecole }))}
+          />
+        </FormField>
         <FormField label="Code" required hint="Ex : INFO, MATH, GC">
           <Input value={code} onChange={e => setCode(e.target.value.toUpperCase())}
             placeholder="INFO" style={{ fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }} />
