@@ -50,6 +50,13 @@ export interface Utilisateur {
   createdAt:         string
 }
 
+export interface CoursFichier {
+  id:                  number
+  nomFichierOriginal:  string
+  tailleFichier?:      number
+  type?:               'pdf' | 'video' | 'slide' | 'autre'
+}
+
 export interface Cours {
   id:                 number
   titre:              string
@@ -58,9 +65,10 @@ export interface Cours {
   statut:             'en_attente' | 'publie' | 'archive'
   anneAcademique:     string
   vues:               number
-  telechargemements:  number
+  telechargements:  number
   ue?:                UE
   enseignant?:        Pick<Utilisateur, 'id'|'nom'|'prenom'>
+  fichiers:           CoursFichier[]
   createdAt:          string
 }
 
@@ -98,7 +106,7 @@ export interface Sujet {
   annee:             number
   avecCorrige:       boolean
   statut:            'en_attente'|'publie'|'archive'
-  telechargemements: number
+  telechargementss: number
   ue?:               UE
   enseignant?:       Pick<Utilisateur, 'id'|'nom'|'prenom'>
   createdAt:         string

@@ -202,7 +202,7 @@ const handleDownload = async (id: number, corrige = false) => {
                     style={{ borderTop: '1px solid var(--border)' }}>
                     <span className="flex items-center gap-1 text-xs mr-auto"
                       style={{ color: 'var(--text-3)' }}>
-                      <Download size={11} /> {sujet.telechargemements}
+                      <Download size={11} /> {sujet.telechargementss}
                     </span>
                     <button onClick={() => handleDownload(sujet.id)}
                       className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"

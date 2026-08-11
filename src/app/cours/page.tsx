@@ -10,10 +10,9 @@ import {
   SkeletonCard, EmptyState, Pagination, PageHeader, Button
 } from '@/components/ui'
 import UploadCoursModal from '@/components/modals/UploadCoursModal'
-import { BookOpen, Download, Eye, Search, X } from 'lucide-react'
+import { BookOpen, Download, Eye, Search, X ,FileText} from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import type { Cours, Filiere } from '@/types'
-import { blob } from 'stream/consumers'
 
 export default function CoursPage() {
 
@@ -38,28 +37,28 @@ export default function CoursPage() {
     { search, type, ueId }
   )
 
-  const handleDownload = async (id: number, titre: string) => {
-    try {
-      const token = getAccessToken()
-      const response = await api.get(`/cours/${id}/telecharger`,{
-        responseType: 'blob'
-      })
-      
+// dans handleDownload, ajouter un paramètre documentId
+const handleDownload = async (coursId: number, documentId: number, titre: string) => {
+  try {
+    const response = await api.get(`/cours/${coursId}/documents/${documentId}/telecharger`, {
+      responseType: 'blob'
+    })
+
     const disposition = response.headers['content-disposition'] || ''
     const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
-    const filename = match?.[1]?.replace(/['"]/g, '') || `${titre}`
+    const filename = match?.[1]?.replace(/['"]/g, '') || titre
 
-      const blob = new Blob([response.data])
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href= url
-      link.download = filename
-      link.click()
-      window.URL.revokeObjectURL(url)
-    } catch (error) {
-      console.log('Erreur téléchargement:',error)
-    }
+    const blob = new Blob([response.data])
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    link.click()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    console.log('Erreur téléchargement:', error)
   }
+}
 
   const hasFilters = search || type || ueId
 
@@ -181,23 +180,38 @@ export default function CoursPage() {
                     {cours.anneAcademique}
                   </span>
                 </div>
-
                 {/* Stats + Télécharger */}
-                <div className="flex items-center justify-between pt-1 mt-auto"
-                  style={{ borderTop: '1px solid var(--border)' }}>
-                  <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--text-3)' }}>
-                    <span className="flex items-center gap-1"><Eye size={12} />{cours.vues}</span>
-                    <span className="flex items-center gap-1"><Download size={12} />{cours.telechargemements}</span>
-                  </div>
-                  <button
-                    onClick={() => handleDownload(cours.id, cours.titre)}
-                    className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
-                    style={{
-                      background: 'var(--brand)', color: 'white',
-                      boxShadow: '0 2px 6px rgba(91,94,244,.3)'
-                    }}>
-                    <Download size={12} /> Télécharger
-                  </button>
+               {/* Stats */}
+                <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--text-3)' }}>
+                  <span className="flex items-center gap-1"><Eye size={12} />{cours.vues}</span>
+                  <span className="flex items-center gap-1"><Download size={12} />{cours.telechargementss}</span>
+                </div>
+
+                {/* Fichiers rattachés — un bouton de téléchargement par fichier */}
+                <div className="flex flex-col gap-1.5 pt-2 mt-auto" style={{ borderTop: '1px solid var(--border)' }}>
+                  {(cours.fichiers ?? []).length === 0 ? (
+                    <p className="text-xs pt-2" style={{ color: 'var(--text-3)' }}>Aucun fichier disponible</p>
+                  ) : (
+                    (cours.fichiers ?? []).map(fichier => (
+                      <div key={fichier.id}
+                        className="flex items-center justify-between gap-2 text-xs pt-1">
+                        <span className="flex items-center gap-1.5 truncate flex-1"
+                          style={{ color: 'var(--text-2)' }}>
+                          <FileText size={12} style={{ flexShrink: 0 }} />
+                          <span className="truncate">{fichier.nomFichierOriginal}</span>
+                        </span>
+                        <button
+                          onClick={() => handleDownload(cours.id, fichier.id, fichier.nomFichierOriginal)}
+                          className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg flex-shrink-0 transition-all"
+                          style={{
+                            background: 'var(--brand)', color: 'white',
+                            boxShadow: '0 2px 6px rgba(91,94,244,.3)'
+                          }}>
+                          <Download size={11} />
+                        </button>
+                      </div>
+                    ))
+                  )}
                 </div>
                 </div>
               </Card>

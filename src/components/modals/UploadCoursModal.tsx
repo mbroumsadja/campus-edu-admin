@@ -1,15 +1,16 @@
 'use client'
 // src/components/modals/UploadCoursModal.tsx
-// Formulaire de dépôt d'un cours — Enseignant ou Admin
+// Formulaire de dépôt d'un cours — Enseignant ou Admin — support multi-PDF
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Modal from './Modal'
-import { FormField, Input, Select, Textarea, FileInput, FormRow, FormSection } from '../shared/FormField'
+import { FormField, Input, Select, Textarea, FormRow, FormSection } from '../shared/FormField'
 import { Button } from '../ui'
 import { coursService, filieresService } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import { AxiosError } from 'axios'
 import type { Filiere, UE } from '@/types'
+import { Paperclip, X, FileText } from 'lucide-react'
 
 interface Props {
   open:     boolean
@@ -18,6 +19,15 @@ interface Props {
 }
 
 interface FieldErrors { [key: string]: string }
+
+const MAX_FICHIERS = 10
+const MAX_SIZE_MB = 50
+const ACCEPTED = ['application/pdf']
+
+function formatSize(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`
+}
 
 export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
   const { user, isAdmin } = useAuth()
@@ -28,7 +38,7 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
   const [annee,        setAnnee]       = useState(`${new Date().getFullYear()}-${new Date().getFullYear() + 1}`)
   const [filiereId,    setFiliereId]   = useState(String(user?.filiere?.id ?? ''))
   const [ueId,         setUeId]        = useState('')
-  const [fichier,      setFichier]     = useState<File | null>(null)
+  const [fichiers,     setFichiers]    = useState<File[]>([])
   const [loading,      setLoading]     = useState(false)
   const [errors,       setErrors]      = useState<FieldErrors>({})
   const [apiError,     setApiError]    = useState('')
@@ -36,7 +46,8 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
   const [filieres, setFilieres] = useState<Filiere[]>([])
   const [ues,      setUes]      = useState<UE[]>([])
 
-  // Charger les filières (admin peut choisir, enseignant est fixé)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
     if (!open) return
     filieresService.list().then(r => {
@@ -46,7 +57,6 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
     }).catch(() => {})
   }, [open, isAdmin, user])
 
-  // Charger les UEs quand la filière change
   useEffect(() => {
     if (!filiereId) { setUes([]); setUeId(''); return }
     filieresService.ues(parseInt(filiereId)).then(r => {
@@ -56,11 +66,48 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
     }).catch(() => {})
   }, [filiereId])
 
+  // ── Gestion multi-fichiers ────────────────────────────────────────
+  const addFiles = (fileList: FileList | null) => {
+    if (!fileList) return
+    const incoming = Array.from(fileList)
+    const rejected: string[] = []
+
+    const valid = incoming.filter(f => {
+      if (type === 'pdf' && !ACCEPTED.includes(f.type)) { rejected.push(f.name); return false }
+      if (f.size > MAX_SIZE_MB * 1024 * 1024) { rejected.push(f.name); return false }
+      return true
+    })
+
+    setFichiers(prev => {
+      const merged = [...prev, ...valid]
+      // évite les doublons (même nom + taille)
+      const seen = new Set<string>()
+      const deduped = merged.filter(f => {
+        const key = `${f.name}_${f.size}`
+        if (seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
+      return deduped.slice(0, MAX_FICHIERS)
+    })
+
+    if (rejected.length) {
+      setErrors(e => ({ ...e, fichiers: `Fichier(s) rejeté(s) (format/taille) : ${rejected.join(', ')}` }))
+    } else {
+      setErrors(e => { const { fichiers, ...rest } = e; return rest })
+    }
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const removeFile = (idx: number) => {
+    setFichiers(prev => prev.filter((_, i) => i !== idx))
+  }
+
   const validate = (): boolean => {
     const e: FieldErrors = {}
-    if (!titre.trim())   e.titre   = 'Le titre est obligatoire'
-    if (!ueId)           e.ueId    = 'Veuillez sélectionner une UE'
-    if (!fichier)        e.fichier = 'Veuillez joindre un fichier'
+    if (!titre.trim())        e.titre    = 'Le titre est obligatoire'
+    if (!ueId)                e.ueId     = 'Veuillez sélectionner une UE'
+    if (fichiers.length === 0) e.fichiers = 'Veuillez joindre au moins un fichier'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -76,7 +123,7 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
     formData.append('type',            type)
     formData.append('ue_id',           ueId)
     formData.append('anneAcademique',  annee)
-    formData.append('fichier',         fichier!)
+    fichiers.forEach(f => formData.append('fichiers', f))
 
     try {
       await coursService.create(formData)
@@ -92,7 +139,7 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
 
   const handleClose = () => {
     setTitre(''); setDescription(''); setType('pdf'); setUeId('')
-    setFichier(null); setErrors({}); setApiError('')
+    setFichiers([]); setErrors({}); setApiError('')
     onClose()
   }
 
@@ -113,7 +160,7 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
         <>
           <Button variant="ghost" onClick={handleClose} disabled={loading}>Annuler</Button>
           <Button onClick={handleSubmit} loading={loading}>
-            {loading ? 'Dépôt en cours…' : 'Déposer le cours'}
+            {loading ? 'Dépôt en cours…' : `Déposer ${fichiers.length > 1 ? `(${fichiers.length} fichiers)` : 'le cours'}`}
           </Button>
         </>
       }>
@@ -178,16 +225,57 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
           </FormField>
         </FormSection>
 
-        <FormSection title="Fichier">
-          <FileInput
-            label="Fichier du cours"
-            accept=".pdf,.mp4,.webm,.pptx,.docx"
-            onChange={setFichier}
-            file={fichier}
-            error={errors.fichier}
-            hint="PDF, vidéo, slides — max 50 MB"
+        <FormSection title="Fichiers">
+          <FormField
+            label={`Fichiers du cours (${fichiers.length}/${MAX_FICHIERS})`}
             required
-          />
+            error={errors.fichiers}
+            hint="PDF, vidéo, slides — max 50 Mo par fichier, jusqu'à 10 fichiers">
+
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={e => e.preventDefault()}
+              onDrop={e => { e.preventDefault(); addFiles(e.dataTransfer.files) }}
+              className="flex flex-col items-center justify-center gap-2 px-4 py-6 rounded-xl cursor-pointer transition-all"
+              style={{
+                border: `1.5px dashed ${errors.fichiers ? '#dc2626' : 'var(--border)'}`,
+                background: 'var(--surface-2)'
+              }}>
+              <Paperclip size={18} style={{ color: 'var(--text-3)' }} />
+              <p className="text-sm text-center" style={{ color: 'var(--text-2)' }}>
+                Cliquez ou glissez vos fichiers ici (plusieurs PDF possibles)
+              </p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.mp4,.webm,.pptx,.docx"
+                onChange={e => addFiles(e.target.files)}
+                className="hidden"
+              />
+            </div>
+
+            {fichiers.length > 0 && (
+              <ul className="mt-3 space-y-2">
+                {fichiers.map((f, idx) => (
+                  <li key={`${f.name}_${f.size}_${idx}`}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
+                    style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+                    <FileText size={14} style={{ color: 'var(--brand)' }} />
+                    <span className="flex-1 truncate" style={{ color: 'var(--text-1)' }}>{f.name}</span>
+                    <span className="text-xs" style={{ color: 'var(--text-3)' }}>{formatSize(f.size)}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(idx)}
+                      className="p-1 rounded-md hover:bg-red-50"
+                      style={{ color: 'var(--red)' }}>
+                      <X size={14} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </FormField>
         </FormSection>
       </div>
     </Modal>
