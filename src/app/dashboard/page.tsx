@@ -83,7 +83,7 @@ export default function DashboardPage() {
           },
           {
             label: 'Total téléchargements',
-            value: cLoading ? '…' : ((cours ?? []) as unknown as Cours[]).reduce((a, c) => a + c.telechargementss, 0),
+            value: cLoading ? '…' : ((cours ?? []) as unknown as Cours[]).reduce((a, c) => a + c.telechargemements, 0),
             icon:  Download,
             color: '#059669',
             bg:    '#ecfdf5',
@@ -199,7 +199,7 @@ export default function DashboardPage() {
                             )}
                             <span className="flex items-center gap-1 text-xs ml-auto"
                               style={{ color: 'var(--text-3)' }}>
-                              <Download size={12} /> {s.telechargementss}
+                              <Download size={12} /> {s.telechargements}
                             </span>
                           </div>
                         </div>

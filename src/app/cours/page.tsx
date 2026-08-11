@@ -184,7 +184,7 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
                {/* Stats */}
                 <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--text-3)' }}>
                   <span className="flex items-center gap-1"><Eye size={12} />{cours.vues}</span>
-                  <span className="flex items-center gap-1"><Download size={12} />{cours.telechargementss}</span>
+                  <span className="flex items-center gap-1"><Download size={12} />{cours.telechargemements}</span>
                 </div>
 
                 {/* Fichiers rattachés — un bouton de téléchargement par fichier */}
@@ -192,25 +192,33 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
                   {(cours.fichiers ?? []).length === 0 ? (
                     <p className="text-xs pt-2" style={{ color: 'var(--text-3)' }}>Aucun fichier disponible</p>
                   ) : (
-                    (cours.fichiers ?? []).map(fichier => (
-                      <div key={fichier.id}
-                        className="flex items-center justify-between gap-2 text-xs pt-1">
-                        <span className="flex items-center gap-1.5 truncate flex-1"
-                          style={{ color: 'var(--text-2)' }}>
-                          <FileText size={12} style={{ flexShrink: 0 }} />
-                          <span className="truncate">{fichier.nomFichierOriginal}</span>
-                        </span>
-                        <button
-                          onClick={() => handleDownload(cours.id, fichier.id, fichier.nomFichierOriginal)}
-                          className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg flex-shrink-0 transition-all"
-                          style={{
-                            background: 'var(--brand)', color: 'white',
-                            boxShadow: '0 2px 6px rgba(91,94,244,.3)'
-                          }}>
-                          <Download size={11} />
-                        </button>
-                      </div>
-                    ))
+                    (cours.fichiers ?? []).map((fichier, i) => {
+                      const total = (cours.fichiers ?? []).length
+                      // Un seul fichier → le titre du cours suffit.
+                      // Plusieurs fichiers → même nom pour tous + numéro d'ordre,
+                      // pour ne pas dépendre du nom brut uploadé (souvent incohérent).
+                      const label = total > 1 ? `${cours.titre} — Document ${i + 1}/${total}` : cours.titre
+                      return (
+                        <div key={fichier.id}
+                          className="flex items-center justify-between gap-2 text-xs pt-1">
+                          <span className="flex items-center gap-1.5 truncate flex-1"
+                            style={{ color: 'var(--text-2)' }}
+                            title={fichier.nomFichierOriginal}>
+                            <FileText size={12} style={{ flexShrink: 0 }} />
+                            <span className="truncate">{label}</span>
+                          </span>
+                          <button
+                            onClick={() => handleDownload(cours.id, fichier.id, fichier.nomFichierOriginal)}
+                            className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg flex-shrink-0 transition-all"
+                            style={{
+                              background: 'var(--brand)', color: 'white',
+                              boxShadow: '0 2px 6px rgba(91,94,244,.3)'
+                            }}>
+                            <Download size={11} />
+                          </button>
+                        </div>
+                      )
+                    })
                   )}
                 </div>
                 </div>
