@@ -102,7 +102,6 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
             <option value="pdf">PDF</option>
             <option value="video">Vidéo</option>
             <option value="slide">Slides</option>
-            <option value="slide">zip</option>
             <option value="autre">Autre</option>
           </select>
 
