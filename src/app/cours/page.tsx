@@ -193,10 +193,6 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
                   ) : (
                     (cours.fichiers ?? []).map((fichier, i) => {
                       const total = (cours.fichiers ?? []).length
-                      // Un seul fichier → le titre du cours suffit.
-                      // Plusieurs fichiers → même nom pour tous + numéro d'ordre,
-                      // pour ne pas dépendre du nom brut uploadé (souvent incohérent).
-                      const label = total > 1 ? `${cours.titre} — Document ${i + 1}/${total}` : cours.titre
                       return (
                         <div key={fichier.id}
                           className="flex items-center justify-between gap-2 text-xs pt-1">
@@ -204,7 +200,17 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
                             style={{ color: 'var(--text-2)' }}
                             title={fichier.nomFichierOriginal}>
                             <FileText size={12} style={{ flexShrink: 0 }} />
-                            <span className="truncate">{label}</span>
+                            {total > 1 && (
+                              <span
+                                className="flex-shrink-0 inline-flex items-center justify-center rounded-full text-[10px] font-semibold"
+                                style={{
+                                  width: 16, height: 16,
+                                  background: 'var(--brand-soft, #eef0fe)', color: 'var(--brand)'
+                                }}>
+                                {i + 1}
+                              </span>
+                            )}
+                            <span className="truncate">{fichier.nomFichierOriginal}</span>
                           </span>
                           <button
                             onClick={() => handleDownload(cours.id, fichier.id, fichier.nomFichierOriginal)}
