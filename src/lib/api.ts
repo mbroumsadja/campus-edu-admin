@@ -160,9 +160,7 @@ export const searchService = {
 export const coursService = {
   list:       (params?: Record<string, unknown>) => api.get('/cours', { params }),
   get:        (id: number) => api.get(`/cours/${id}`),
-  create:     (data: FormData) => api.post('/cours', data, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
+  create:     (data: Record<string, unknown>) => api.post('/cours', data),
   changerStatut: (id: number, statut: string) =>
     api.patch(`/cours/${id}/statut`, { statut }),
   supprimer:  (id: number) => api.delete(`/cours/${id}`),
@@ -172,9 +170,7 @@ export const coursService = {
 export const sujetsService = {
   list:       (params?: Record<string, unknown>) => api.get('/sujets', { params }),
   get:        (id: number) => api.get(`/sujets/${id}`),
-  create:     (data: FormData) => api.post('/sujets', data, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
+  create:     (data: Record<string, unknown>) => api.post('/sujets', data),
   changerStatut: (id: number, statut: string) =>
     api.patch(`/sujets/${id}/statut`, { statut }),
   telechargerUrl: (id: number, corrige = false) =>

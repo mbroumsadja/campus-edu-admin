@@ -6,6 +6,7 @@ import Modal from './Modal'
 import { FormField, Input, Select, FileInput, FormRow, FormSection } from '../shared/FormField'
 import { Button } from '../ui'
 import { sujetsService, filieresService } from '@/lib/api'
+import { uploaderFichiers } from '@/lib/upload'
 import { useAuth } from '@/lib/auth-context'
 import { AxiosError } from 'axios'
 import type { Filiere, UE } from '@/types'
@@ -25,6 +26,7 @@ export default function UploadSujetModal({ open, onClose, onSuccess }: Props) {
   const [fichierSujet,  setFichierSujet] = useState<File | null>(null)
   const [fichierCorrige,setFichierCorrige] = useState<File | null>(null)
   const [loading,       setLoading]      = useState(false)
+  const [uploadStep,    setUploadStep]   = useState('')
   const [errors,        setErrors]       = useState<FieldErrors>({})
   const [apiError,      setApiError]     = useState('')
 
@@ -62,17 +64,21 @@ export default function UploadSujetModal({ open, onClose, onSuccess }: Props) {
     setLoading(true)
     setApiError('')
 
-    const formData = new FormData()
-    formData.append('titre',   titre.trim())
-    formData.append('type',    type)
-    formData.append('session', session)
-    formData.append('annee',   annee)
-    formData.append('ue_id',   ueId)
-    formData.append('sujet',   fichierSujet!)
-    if (fichierCorrige) formData.append('corrige', fichierCorrige)
-
     try {
-      await sujetsService.create(formData)
+      setUploadStep('Envoi du sujet…')
+      const filesToUpload = fichierCorrige ? [fichierSujet!, fichierCorrige] : [fichierSujet!]
+      const [sujetUploade, corrigeUploade] = await uploaderFichiers(filesToUpload)
+
+      setUploadStep('Enregistrement…')
+      await sujetsService.create({
+        titre:   titre.trim(),
+        type,
+        session,
+        annee,
+        ue_id:   ueId,
+        sujet:   sujetUploade,
+        ...(corrigeUploade ? { corrige: corrigeUploade } : {}),
+      })
       handleClose()
       onSuccess()
     } catch (err) {
@@ -80,6 +86,7 @@ export default function UploadSujetModal({ open, onClose, onSuccess }: Props) {
       setApiError(e.response?.data?.message || 'Erreur lors du dépôt du sujet')
     } finally {
       setLoading(false)
+      setUploadStep('')
     }
   }
 
@@ -106,7 +113,7 @@ export default function UploadSujetModal({ open, onClose, onSuccess }: Props) {
         <>
           <Button variant="ghost" onClick={handleClose} disabled={loading}>Annuler</Button>
           <Button onClick={handleSubmit} loading={loading}>
-            {loading ? 'Dépôt en cours…' : 'Déposer le sujet'}
+            {loading ? (uploadStep || 'Dépôt en cours…') : 'Déposer le sujet'}
           </Button>
         </>
       }>
@@ -140,7 +147,7 @@ export default function UploadSujetModal({ open, onClose, onSuccess }: Props) {
             <FormField label="Session">
               <Select value={session} onChange={e => setSession(e.target.value)}
                 options={[
-                  { value: 'session_normale',    label: 'Session normale' },
+                  { value: 'normale',    label: 'Session normale' },
                   { value: 'rattrapage', label: 'Session de rattrapage' },
                 ]} />
             </FormField>
