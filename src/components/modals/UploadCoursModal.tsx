@@ -123,7 +123,7 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
     formData.append('type',            type)
     formData.append('ue_id',           ueId)
     formData.append('anneAcademique',  annee)
-    fichiers.forEach(f => formData.append('fichiers', f))
+    fichiers.forEach(f => formData.append('documents', f))
 
     try {
       await coursService.create(formData)
