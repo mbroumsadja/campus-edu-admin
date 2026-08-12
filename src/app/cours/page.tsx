@@ -27,7 +27,7 @@ export default function CoursPage() {
   const { data: filieresRaw } = useQuery(filieresService.list)
   const filieres = (filieresRaw as unknown as { data: Filiere[] })?.data ?? []
 
-  const { items, pagination, loading, error, page, setPage } = usePaginatedQuery<Cours>(
+  const { items, pagination, loading, error, page, setPage, refetch } = usePaginatedQuery<Cours>(
     (p) => coursService.list({
       page: p, limit: 12,
       ...(search && { search }),
@@ -234,7 +234,7 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
       <UploadCoursModal
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}
-        onSuccess={() => { setUploadOpen(false); setPage(1) }}
+        onSuccess={() => { setUploadOpen(false); setPage(1); refetch() }}
       />
     </AppShell>
   )

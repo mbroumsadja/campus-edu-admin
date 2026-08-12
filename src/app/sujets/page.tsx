@@ -32,7 +32,7 @@ export default function SujetsPage() {
   const [annee,       setAnnee]     = useState('')
   const [uploadOpen,  setUploadOpen] = useState(false)
 
-  const { items, pagination, loading, error, page, setPage } = usePaginatedQuery<Sujet>(
+  const { items, pagination, loading, error, page, setPage, refetch } = usePaginatedQuery<Sujet>(
     (p) => sujetsService.list({
       page: p, limit: 12,
       ...(search  && { search }),
@@ -231,7 +231,7 @@ const handleDownload = async (id: number, corrige = false) => {
       <UploadSujetModal
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}
-        onSuccess={() => { setUploadOpen(false); setPage(1) }}
+        onSuccess={() => { setUploadOpen(false); setPage(1); refetch() }}
       />
     </AppShell>
   )
