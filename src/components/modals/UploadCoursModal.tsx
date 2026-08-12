@@ -7,6 +7,7 @@ import Modal from './Modal'
 import { FormField, Input, Select, Textarea, FormRow, FormSection } from '../shared/FormField'
 import { Button } from '../ui'
 import { coursService, filieresService } from '@/lib/api'
+import { uploaderFichiers } from '@/lib/upload'
 import { useAuth } from '@/lib/auth-context'
 import { AxiosError } from 'axios'
 import type { Filiere, UE } from '@/types'
@@ -40,6 +41,7 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
   const [ueId,         setUeId]        = useState('')
   const [fichiers,     setFichiers]    = useState<File[]>([])
   const [loading,      setLoading]     = useState(false)
+  const [uploadStep,   setUploadStep]  = useState('')
   const [errors,       setErrors]      = useState<FieldErrors>({})
   const [apiError,     setApiError]    = useState('')
 
@@ -117,16 +119,24 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
     setLoading(true)
     setApiError('')
 
-    const formData = new FormData()
-    formData.append('titre',           titre.trim())
-    formData.append('description',     description)
-    formData.append('type',            type)
-    formData.append('ue_id',           ueId)
-    formData.append('anneAcademique',  annee)
-    fichiers.forEach(f => formData.append('documents', f))
-
     try {
-      await coursService.create(formData)
+      setUploadStep(fichiers.length > 1 ? `Envoi des fichiers (0/${fichiers.length})…` : 'Envoi du fichier…')
+      let done = 0
+      const fichiersUploades = await uploaderFichiers(fichiers, () => {
+        // onProgress par fichier — on ne compte que les fichiers terminés
+        // pour garder un message simple et lisible.
+      })
+      done = fichiersUploades.length
+      setUploadStep('Enregistrement du cours…')
+
+      await coursService.create({
+        titre:          titre.trim(),
+        description,
+        type,
+        ue_id:          ueId,
+        anneAcademique: annee,
+        fichiers:       fichiersUploades,
+      })
       handleClose()
       onSuccess()
     } catch (err) {
@@ -134,6 +144,7 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
       setApiError(e.response?.data?.message || 'Erreur lors du dépôt du cours')
     } finally {
       setLoading(false)
+      setUploadStep('')
     }
   }
 
@@ -160,7 +171,7 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
         <>
           <Button variant="ghost" onClick={handleClose} disabled={loading}>Annuler</Button>
           <Button onClick={handleSubmit} loading={loading}>
-            {loading ? 'Dépôt en cours…' : `Déposer ${fichiers.length > 1 ? `(${fichiers.length} fichiers)` : 'le cours'}`}
+            {loading ? (uploadStep || 'Dépôt en cours…') : `Déposer ${fichiers.length > 1 ? `(${fichiers.length} fichiers)` : 'le cours'}`}
           </Button>
         </>
       }>
