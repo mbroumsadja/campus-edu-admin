@@ -49,14 +49,14 @@ export default function Modal({ open, onClose, title, subtitle, children, footer
 
       <div
         className={clsx(
-          'w-full rounded-2xl flex flex-col animate-fade-up',
+          'w-full rounded-2xl flex flex-col animate-fade-up overflow-hidden',
           SIZE_CLASSES[size]
         )}
         style={{
           background:  'white',
           border:      '1px solid var(--border)',
           boxShadow:   '0 20px 60px rgba(0,0,0,0.18)',
-          maxHeight:   '90vh',
+          maxHeight:   '90dvh',
         }}>
 
         {/* Header */}
@@ -74,7 +74,7 @@ export default function Modal({ open, onClose, title, subtitle, children, footer
         </div>
 
         {/* Body — scrollable */}
-        <div className="flex-1 overflow-y-auto px-6 py-5">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5">
           {children}
         </div>
 
