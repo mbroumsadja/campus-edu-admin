@@ -2,7 +2,8 @@
 // src/components/modals/Modal.tsx
 // Composant Modal générique — base pour tous les formulaires popup
 
-import { ReactNode, useEffect, useRef } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -24,6 +25,9 @@ const SIZE_CLASSES = {
 
 export default function Modal({ open, onClose, title, subtitle, children, footer, size = 'md' }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
 
   // Fermer avec Escape
   useEffect(() => {
@@ -38,12 +42,12 @@ export default function Modal({ open, onClose, title, subtitle, children, footer
     return () => { document.body.style.overflow = '' }
   }, [open])
 
-  if (!open) return null
+  if (!open || !mounted) return null
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       style={{ background: 'rgba(15,17,23,0.55)', backdropFilter: 'blur(4px)' }}
       onClick={(e) => { if (e.target === overlayRef.current) onClose() }}>
 
@@ -86,6 +90,7 @@ export default function Modal({ open, onClose, title, subtitle, children, footer
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
