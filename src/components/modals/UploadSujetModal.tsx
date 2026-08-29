@@ -137,9 +137,8 @@ export default function UploadSujetModal({ open, onClose, onSuccess }: Props) {
             <FormField label="Type d'épreuve">
               <Select value={type} onChange={e => setType(e.target.value)}
                 options={[
-                  { value: 'cc',   label: 'Controlle continue' },
-                  { value: 'sn',  label: 'Session Normale' },
-                  { value: 'rattrapage',label: 'Rattrapage' },
+                  { value: 'partiel',   label: 'Partiel' },
+                  { value: 'terminal',  label: 'Terminal' },
                   { value: 'tp',        label: 'TP' },
                   { value: 'td',        label: 'TD' },
                 ]} />
