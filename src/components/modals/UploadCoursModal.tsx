@@ -69,37 +69,36 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
   }, [filiereId])
 
   // ── Gestion multi-fichiers ────────────────────────────────────────
-  const addFiles = (fileList: FileList | null) => {
-    if (!fileList) return
-    const incoming = Array.from(fileList)
-    const rejected: string[] = []
+ const addFiles = (fileList: FileList | null) => {
+  if (!fileList) return
+  const incoming = Array.from(fileList)
+  const rejected: string[] = []
 
-    const valid = incoming.filter(f => {
-      if (type === 'pdf' && !ACCEPTED.includes(f.type)) { rejected.push(f.name); return false }
-      if (f.size > MAX_SIZE_MB * 1024 * 1024) { rejected.push(f.name); return false }
+  const valid = incoming.filter(f => {
+    if (!ACCEPTED.includes(f.type)) { rejected.push(f.name); return false }
+    if (f.size > MAX_SIZE_MB * 1024 * 1024) { rejected.push(f.name); return false }
+    return true
+  })
+
+  setFichiers(prev => {
+    const merged = [...prev, ...valid]
+    const seen = new Set<string>()
+    const deduped = merged.filter(f => {
+      const key = `${f.name}_${f.size}`
+      if (seen.has(key)) return false
+      seen.add(key)
       return true
     })
+    return deduped.slice(0, MAX_FICHIERS)
+  })
 
-    setFichiers(prev => {
-      const merged = [...prev, ...valid]
-      // évite les doublons (même nom + taille)
-      const seen = new Set<string>()
-      const deduped = merged.filter(f => {
-        const key = `${f.name}_${f.size}`
-        if (seen.has(key)) return false
-        seen.add(key)
-        return true
-      })
-      return deduped.slice(0, MAX_FICHIERS)
-    })
-
-    if (rejected.length) {
-      setErrors(e => ({ ...e, fichiers: `Fichier(s) rejeté(s) (format/taille) : ${rejected.join(', ')}` }))
-    } else {
-      setErrors(e => { const { fichiers, ...rest } = e; return rest })
-    }
-    if (fileInputRef.current) fileInputRef.current.value = ''
+  if (rejected.length) {
+    setErrors(e => ({ ...e, fichiers: `Fichier(s) rejeté(s) (format/taille) : ${rejected.join(', ')}` }))
+  } else {
+    setErrors(e => { const { fichiers, ...rest } = e; return rest })
   }
+  if (fileInputRef.current) fileInputRef.current.value = ''
+}
 
   const removeFile = (idx: number) => {
     setFichiers(prev => prev.filter((_, i) => i !== idx))
