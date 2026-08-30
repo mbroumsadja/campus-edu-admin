@@ -69,13 +69,30 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
   }, [filiereId])
 
   // ── Gestion multi-fichiers ────────────────────────────────────────
- const addFiles = (fileList: FileList | null) => {
+ const ACCEPTED_MIME = [
+  'application/pdf',
+  'video/mp4', 'video/webm',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]
+
+const ACCEPTED_EXT = ['pdf', 'mp4', 'webm', 'ppt', 'pptx', 'doc', 'docx']
+
+function isAccepted(f: File) {
+  if (ACCEPTED_MIME.includes(f.type)) return true
+  const ext = f.name.split('.').pop()?.toLowerCase() ?? ''
+  return ACCEPTED_EXT.includes(ext)
+}
+
+const addFiles = (fileList: FileList | null) => {
   if (!fileList) return
   const incoming = Array.from(fileList)
   const rejected: string[] = []
 
   const valid = incoming.filter(f => {
-    if (!ACCEPTED.includes(f.type)) { rejected.push(f.name); return false }
+    if (!isAccepted(f)) { rejected.push(f.name); return false }
     if (f.size > MAX_SIZE_MB * 1024 * 1024) { rejected.push(f.name); return false }
     return true
   })
@@ -99,7 +116,6 @@ export default function UploadCoursModal({ open, onClose, onSuccess }: Props) {
   }
   if (fileInputRef.current) fileInputRef.current.value = ''
 }
-
   const removeFile = (idx: number) => {
     setFichiers(prev => prev.filter((_, i) => i !== idx))
   }
