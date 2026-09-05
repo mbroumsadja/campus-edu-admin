@@ -167,6 +167,21 @@ export default function AdminEcolesPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {ecoles.map((ecole) => (
             <Card key={ecole.id} className="p-5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:items-center mb-4">
+                <button
+                  onClick={() => { setSelectedEcole(ecole); setEditOpen(true) }}
+                  className="flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg w-full sm:w-auto"
+                  style={{ background: '#eef2ff', color: 'var(--brand)', border: '1px solid #c7d2fe' }}>
+                  <Pencil size={12} /> Modifier
+                </button>
+                <button
+                  onClick={() => handleDelete(ecole.id)}
+                  disabled={deletingId === ecole.id}
+                  className="flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg w-full sm:w-auto"
+                  style={{ background: '#fef2f2', color: 'var(--red)', border: '1px solid #fecaca' }}>
+                  <Trash2 size={12} /> {deletingId === ecole.id ? '...' : 'Supprimer'}
+                </button>
+              </div>
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)' }}>
@@ -176,21 +191,6 @@ export default function AdminEcolesPage() {
                   <h3 className="font-semibold text-gray-900">{ecole.ecole}</h3>
                   <p className="text-xs mt-1" style={{ color: 'var(--text-3)' }}>Identifiant #{ecole.id}</p>
                 </div>
-              </div>
-              <div className="flex justify-end gap-2 mt-5">
-                <button
-                  onClick={() => { setSelectedEcole(ecole); setEditOpen(true) }}
-                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg"
-                  style={{ background: '#eef2ff', color: 'var(--brand)', border: '1px solid #c7d2fe' }}>
-                  <Pencil size={12} /> Modifier
-                </button>
-                <button
-                  onClick={() => handleDelete(ecole.id)}
-                  disabled={deletingId === ecole.id}
-                  className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg"
-                  style={{ background: '#fef2f2', color: 'var(--red)', border: '1px solid #fecaca' }}>
-                  <Trash2 size={12} /> {deletingId === ecole.id ? '...' : 'Supprimer'}
-                </button>
               </div>
             </Card>
           ))}

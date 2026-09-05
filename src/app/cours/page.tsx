@@ -215,7 +215,7 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
                 </div>
 
                 {isOwner(cours) && (
-                  <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:items-start">
                     <button
                       onClick={() => openEditCours(cours)}
                       className="w-full sm:w-auto text-xs font-medium px-2.5 py-1.5 rounded-lg border"

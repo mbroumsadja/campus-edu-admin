@@ -425,9 +425,30 @@ function FiliereCard({
 
   return (
     <Card className="overflow-hidden">
+      <div className="flex flex-col gap-2 p-4 pb-2 sm:flex-row sm:justify-end">
+        <button
+          onClick={(e) => { e.stopPropagation(); onEditFiliere(filiere) }}
+          className="w-full sm:w-auto text-xs font-medium px-2.5 py-1.5 rounded-lg transition-all"
+          style={{ background: '#eef2ff', color: '#312e81', border: '1px solid rgba(99,102,241,.18)' }}>
+          Modifier
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); onDeleteFiliere(filiere) }}
+          className="w-full sm:w-auto text-xs font-medium px-2.5 py-1.5 rounded-lg transition-all"
+          style={{ background: '#fef2f2', color: '#b91c1c', border: '1px solid rgba(239,68,68,.18)' }}>
+          Supprimer
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); onAddUE(filiere) }}
+          className="flex items-center justify-center gap-1.5 w-full sm:w-auto text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+          style={{ background: 'var(--brand-soft)', color: 'var(--brand)', border: '1px solid rgba(11,63,138,0.12)' }}>
+          <Plus size={12} /> UE
+        </button>
+      </div>
+
       {/* Header filière */}
       <div
-        className="flex items-center gap-4 p-5 cursor-pointer hover:bg-gray-50/50 transition-colors select-none"
+        className="flex items-center gap-4 p-5 pt-2 cursor-pointer hover:bg-gray-50/50 transition-colors select-none"
         onClick={toggleExpand}>
         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{ background: 'linear-gradient(135deg, var(--brand-soft), rgba(221,214,254,0.6))' }}>
@@ -446,25 +467,7 @@ function FiliereCard({
           )}
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            onClick={(e) => { e.stopPropagation(); onEditFiliere(filiere) }}
-            className="text-xs font-medium px-2.5 py-1.5 rounded-lg transition-all"
-            style={{ background: '#eef2ff', color: '#312e81', border: '1px solid rgba(99,102,241,.18)' }}>
-            Modifier
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onDeleteFiliere(filiere) }}
-            className="text-xs font-medium px-2.5 py-1.5 rounded-lg transition-all"
-            style={{ background: '#fef2f2', color: '#b91c1c', border: '1px solid rgba(239,68,68,.18)' }}>
-            Supprimer
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onAddUE(filiere) }}
-            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
-            style={{ background: 'var(--brand-soft)', color: 'var(--brand)', border: '1px solid rgba(11,63,138,0.12)' }}>
-            <Plus size={12} /> UE
-          </button>
+        <div className="flex-shrink-0">
           {expanded
             ? <ChevronDown size={16} style={{ color: 'var(--text-3)' }} />
             : <ChevronRight size={16} style={{ color: 'var(--text-3)' }} />}
