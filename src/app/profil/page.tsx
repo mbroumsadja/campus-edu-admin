@@ -68,7 +68,11 @@ export default function ProfilPage() {
 
   if (!user) return null
 
-  const initials = `${user.prenom[0]}${user.nom[0]}`.toUpperCase()
+  const displayName = [user.prenom, user.nom].filter(Boolean).join(' ') || 'Utilisateur'
+  const initials = [user.prenom, user.nom].map(part => part?.[0] ?? '').join('').slice(0, 2).toUpperCase() || 'U'
+  const filiereLabel = user.filiere
+    ? `${user.filiere.nom}${user.filiere.code ? ` (${user.filiere.code})` : ''}`
+    : 'Filière non renseignée'
 
   return (
     <AppShell>
@@ -85,18 +89,18 @@ export default function ProfilPage() {
           {/* Avatar card */}
           <Card className="p-6 flex flex-col items-center gap-4">
             <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-white font-display font-bold text-2xl"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #818cf8)' }}>
+              style={{ background: `linear-gradient(135deg, var(--brand), var(--brand-strong))` }}>
               {initials}
             </div>
             <div className="text-center">
               <h2 className="font-display text-lg font-bold text-gray-900">
-                {user.prenom} {user.nom}
+                {displayName}
               </h2>
               <p className="text-sm mt-1" style={{ color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>
                 {user.matricule}
               </p>
               <span className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium px-3 py-1 rounded-full"
-                style={{ background: '#eef2ff', color: 'var(--brand)', border: '1px solid #c7d2fe' }}>
+               style={{ background: 'var(--brand-soft)', color: 'var(--brand)', border: '1px solid rgba(13,110,253,0.12)' }}>
                 <Shield size={11} />
                 {ROLE_LABEL[user.role]}
               </span>
@@ -111,7 +115,7 @@ export default function ProfilPage() {
               {
                 icon: User,
                 label: 'Nom complet',
-                value: `${user.prenom} ${user.nom}`,
+                value: displayName,
               },
               {
                 icon: Hash,
@@ -122,7 +126,7 @@ export default function ProfilPage() {
               ...(user.filiere ? [{
                 icon: BookOpen,
                 label: 'Filière',
-                value: `${user.filiere.nom} (${user.filiere.code})`,
+                value: filiereLabel,
               }] : []),
               ...(user.niveau ? [{
                 icon: GraduationCap,
@@ -154,8 +158,8 @@ export default function ProfilPage() {
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ background: '#fdf4ff' }}>
-                <Shield size={16} style={{ color: '#7c3aed' }} />
+               style={{ background: 'var(--accent-soft)' }}>
+                <Shield size={16} style={{ color: 'var(--brand-alt)' }} />
               </div>
               <div>
                 <h3 className="font-display font-semibold text-gray-900">Changer le mot de passe</h3>
@@ -237,48 +241,6 @@ export default function ProfilPage() {
               </div>
             </div>
           </Card>
-
-          {/* Infos session */}
-          <Card className="p-6">
-            <h3 className="font-display font-semibold text-gray-900 mb-4">Sécurité du compte</h3>
-            <div className="space-y-3">
-              {[
-                {
-                  label: 'Authentification',
-                  value: 'JWT avec refresh token automatique',
-                  icon: Shield,
-                  color: '#059669',
-                  bg:   '#ecfdf5',
-                },
-                {
-                  label: 'Durée de session',
-                  value: '4 heures (renouvellement automatique)',
-                  icon: GraduationCap,
-                  color: '#0891b2',
-                  bg:   '#ecfeff',
-                },
-                {
-                  label: 'Rôle',
-                  value: ROLE_LABEL[user.role] + ' — accès selon votre profil',
-                  icon: User,
-                  color: 'var(--brand)',
-                  bg:   '#eef2ff',
-                },
-              ].map(({ label, value, icon: Icon, color, bg }) => (
-                <div key={label} className="flex items-center gap-3 p-3 rounded-xl"
-                  style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: bg }}>
-                    <Icon size={14} style={{ color }} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-gray-700">{label}</p>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>{value}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
         </div>
       </div>
     </AppShell>
@@ -297,7 +259,13 @@ function PasswordStrength({ password }: { password: string }) {
   const score = checks.filter(c => c.ok).length
 
   const strengthLabel = ['Très faible', 'Faible', 'Moyen', 'Fort', 'Très fort'][score]
-  const strengthColor = ['#ef4444', '#f97316', '#f59e0b', '#22c55e', '#16a34a'][score]
+  const strengthColor = [
+    'var(--red)',
+    'var(--amber)',
+    'var(--amber)',
+    'var(--green)',
+    'var(--green)'
+  ][score]
 
   return (
     <div className="space-y-2">

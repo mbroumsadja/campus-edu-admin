@@ -10,22 +10,25 @@
   --font-body:    'IBM Plex Sans', sans-serif;
   --font-mono:    'IBM Plex Mono', monospace;
 
-  /* Brand */
-  --brand:        #004488;
-  --brand-light:  #818cf8;
-  --brand-dark:   #4338ca;
+  /* Brand — campus edu (primary + accent) */
+  --brand:        #0d6efd;     /* primary */
+  --brand-strong: #0b5ed7;     /* darker */
+  --brand-soft:   #cfe8ff;     /* light background */
+  --brand-light:  #7fc1f2;     /* used for highlights */
+  --brand-alt:    #6610f2;     /* accent / secondary (purple) */
+  --accent-soft:  rgba(102,16,242,0.08); /* subtle accent background */
 
   /* Surfaces */
-  --bg:           #f6f7fb;
+  --bg:           #f5f9fe;
   --surface:      #ffffff;
-  --surface-2:    #f1f3f9;
-  --border:       #e4e8f0;
-  --border-2:     #d0d5e8;
+  --surface-2:    #edf4fb;
+  --border:       #dfeaf6;
+  --border-2:     #c7d9ec;
 
   /* Text */
-  --text-1:       #0f1117;
-  --text-2:       #4b5268;
-  --text-3:       #8891aa;
+  --text-1:       #0b1f36;
+  --text-2:       #3f5573;
+  --text-3:       #6f87a3;
 
   /* Status */
   --green:  #16a34a;

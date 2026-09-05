@@ -38,7 +38,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <header
         className="flex items-center justify-between px-6 h-14 flex-shrink-0 round1"
         style={{
-          background: '#003356',
+          background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand-strong) 100%)',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}
       >
@@ -62,7 +62,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           >
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
-              style={{ background: 'rgba(165,180,252,0.3)' }}
+              style={{ background: 'rgba(127, 193, 242, 0.28)' }}
             >
               {user?.prenom?.[0]}{user?.nom?.[0]}
             </div>
@@ -78,7 +78,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           {profileOpen && (
             <div
               className="absolute right-0 top-full mt-2 w-48 rounded-xl overflow-hidden z-50 shadow-xl"
-              style={{ background: '#002a45', border: '1px solid rgba(255,255,255,0.08)' }}
+              style={{ background: 'var(--brand-strong)', border: '1px solid rgba(255,255,255,0.08)' }}
             >
               <Link
                 href="/profil"
@@ -102,7 +102,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <nav
         className="flex-shrink-0 justify-between fixed bottom-0 right-0 rounded-xl z-10"
         style={{
-          background: '#002a45',
+          background: 'var(--brand-strong)',
           borderBottom: '1px solid rgba(255,255,255,0.08)',
         }}
       >

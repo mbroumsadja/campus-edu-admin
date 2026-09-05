@@ -161,6 +161,13 @@ export const coursService = {
   list:       (params?: Record<string, unknown>) => api.get('/cours', { params }),
   get:        (id: number) => api.get(`/cours/${id}`),
   create:     (data: Record<string, unknown>) => api.post('/cours', data),
+  update:     (id: number, data: Record<string, unknown> | FormData) => {
+    // Si on envoie du FormData (fichiers), laisser axios gérer l'en-tête multipart
+    if (typeof FormData !== 'undefined' && data instanceof FormData) {
+      return api.put(`/cours/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+    }
+    return api.put(`/cours/${id}`, data)
+  },
   changerStatut: (id: number, statut: string) =>
     api.patch(`/cours/${id}/statut`, { statut }),
   supprimer:  (id: number) => api.delete(`/cours/${id}`),
@@ -171,8 +178,15 @@ export const sujetsService = {
   list:       (params?: Record<string, unknown>) => api.get('/sujets', { params }),
   get:        (id: number) => api.get(`/sujets/${id}`),
   create:     (data: Record<string, unknown>) => api.post('/sujets', data),
+  update:     (id: number, data: Record<string, unknown> | FormData) => {
+    if (typeof FormData !== 'undefined' && data instanceof FormData) {
+      return api.put(`/sujets/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+    }
+    return api.put(`/sujets/${id}`, data)
+  },
   changerStatut: (id: number, statut: string) =>
     api.patch(`/sujets/${id}/statut`, { statut }),
+  supprimer:  (id: number) => api.delete(`/sujets/${id}`),
   telechargerUrl: (id: number, corrige = false) =>
     `${BASE_URL}/sujets/${id}/telecharger${corrige ? '?corrige=true' : ''}`,
 }

@@ -24,13 +24,20 @@ const SESSION_COLORS: Record<string, { bg: string; color: string }> = {
 }
 
 export default function SujetsPage() {
-  const { isAdmin, isEnseignant } = useAuth()
+  const { user, isAdmin, isEnseignant } = useAuth()
 
   const [search,      setSearch]    = useState('')
   const [type,        setType]      = useState('')
   const [session,     setSession]   = useState('')
   const [annee,       setAnnee]     = useState('')
   const [uploadOpen,  setUploadOpen] = useState(false)
+  const [editingSujetId, setEditingSujetId] = useState<number | null>(null)
+  const [editTitre, setEditTitre] = useState('')
+  const [editSujetType, setEditSujetType] = useState<'partiel' | 'rattrapage' | 'terminal' | 'tp' | 'td'>('partiel')
+  const [editSession, setEditSession] = useState<'normale' | 'rattrapage'>('normale')
+  const [editAnnee, setEditAnnee] = useState(String(new Date().getFullYear()))
+  const [editSujetFile, setEditSujetFile] = useState<File | null>(null)
+  const [editCorrigeFile, setEditCorrigeFile] = useState<File | null>(null)
 
   const { items, pagination, loading, error, page, setPage, refetch } = usePaginatedQuery<Sujet>(
     (p) => sujetsService.list({
@@ -42,6 +49,55 @@ export default function SujetsPage() {
     }),
     { search, type, session, annee }
   )
+
+  const isOwner = (sujet: Sujet) => isAdmin || user?.id === sujet.enseignant?.id
+
+  const openEditSujet = (sujet: Sujet) => {
+    setEditingSujetId(sujet.id)
+    setEditTitre(sujet.titre)
+    setEditSujetType(sujet.type)
+    setEditSession(sujet.session)
+    setEditAnnee(String(sujet.annee))
+  }
+
+  const handleDeleteSujet = async (id: number) => {
+    if (!window.confirm('Supprimer ce sujet ?')) return
+    try {
+      await sujetsService.supprimer(id)
+      setEditingSujetId(null)
+      refetch()
+    } catch (err) {
+      console.error('Erreur suppression sujet:', err)
+      alert('Impossible de supprimer ce sujet.')
+    }
+  }
+
+  const handleUpdateSujet = async (id: number) => {
+    try {
+      if (editSujetFile || editCorrigeFile) {
+        const fd = new FormData()
+        fd.append('titre', editTitre.trim())
+        fd.append('type', editSujetType)
+        fd.append('session', editSession)
+        fd.append('annee', String(editAnnee))
+        if (editSujetFile) fd.append('sujet', editSujetFile)
+        if (editCorrigeFile) fd.append('corrige', editCorrigeFile)
+        await sujetsService.update(id, fd)
+      } else {
+        await sujetsService.update(id, {
+          titre: editTitre.trim(),
+          type: editSujetType,
+          session: editSession,
+          annee: Number(editAnnee),
+        })
+      }
+      setEditingSujetId(null)
+      refetch()
+    } catch (err) {
+      console.error('Erreur modification sujet:', err)
+      alert('Impossible de modifier ce sujet.')
+    }
+  }
 
 
   const currentYear = new Date().getFullYear()
@@ -177,6 +233,80 @@ const handleDownload = async (id: number, corrige = false) => {
                       )}
                     </div>
                   </div>
+
+                  {isOwner(sujet) && (
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        onClick={() => openEditSujet(sujet)}
+                        className="text-xs font-medium px-2.5 py-1.5 rounded-lg border"
+                        style={{ borderColor: 'var(--border)', color: 'var(--text-2)', background: 'var(--surface-2)' }}>
+                        Modifier
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSujet(sujet.id)}
+                        className="text-xs font-medium px-2.5 py-1.5 rounded-lg border"
+                        style={{ borderColor: 'rgba(220,38,38,.2)', color: '#b91c1c', background: 'rgba(220,38,38,.06)' }}>
+                        Supprimer
+                      </button>
+                    </div>
+                  )}
+
+                  {editingSujetId === sujet.id && isOwner(sujet) && (
+                    <div className="rounded-xl p-3 space-y-2" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+                      <input
+                        value={editTitre}
+                        onChange={(e) => setEditTitre(e.target.value)}
+                        className="w-full rounded-lg px-2.5 py-2 text-sm border outline-none"
+                        style={{ borderColor: 'var(--border)', background: 'white' }}
+                        placeholder="Titre du sujet"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <select
+                          value={editSujetType}
+                          onChange={(e) => setEditSujetType(e.target.value as 'partiel' | 'rattrapage' | 'terminal' | 'tp' | 'td')}
+                          className="w-full rounded-lg px-2.5 py-2 text-sm border outline-none"
+                          style={{ borderColor: 'var(--border)', background: 'white' }}
+                        >
+                          <option value="partiel">Partiel</option>
+                          <option value="rattrapage">Rattrapage</option>
+                          <option value="terminal">Terminal</option>
+                          <option value="tp">TP</option>
+                          <option value="td">TD</option>
+                        </select>
+                        <select
+                          value={editSession}
+                          onChange={(e) => setEditSession(e.target.value as 'normale' | 'rattrapage')}
+                          className="w-full rounded-lg px-2.5 py-2 text-sm border outline-none"
+                          style={{ borderColor: 'var(--border)', background: 'white' }}
+                        >
+                          <option value="normale">Normale</option>
+                          <option value="rattrapage">Rattrapage</option>
+                        </select>
+                      </div>
+                      <select
+                        value={editAnnee}
+                        onChange={(e) => setEditAnnee(e.target.value)}
+                        className="w-full rounded-lg px-2.5 py-2 text-sm border outline-none"
+                        style={{ borderColor: 'var(--border)', background: 'white' }}
+                      >
+                        {Array.from({ length: 8 }, (_, i) => currentYear - i).map((year) => (
+                          <option key={year} value={String(year)}>{year}</option>
+                        ))}
+                      </select>
+
+                      <div className="space-y-2">
+                        <label className="text-xs">Remplacer le sujet (fichier)</label>
+                        <input type="file" accept="application/pdf" onChange={(e) => setEditSujetFile(e.target.files?.[0] ?? null)} />
+                        <label className="text-xs">Remplacer le corrigé (optionnel)</label>
+                        <input type="file" accept="application/pdf" onChange={(e) => setEditCorrigeFile(e.target.files?.[0] ?? null)} />
+                      </div>
+
+                      <div className="flex justify-end gap-2 pt-1">
+                        <button onClick={() => setEditingSujetId(null)} className="text-xs px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>Annuler</button>
+                        <button onClick={() => handleUpdateSujet(sujet.id)} className="text-xs px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--brand)', color: 'white' }}>Enregistrer</button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Méta */}
                   <div className="flex flex-wrap items-center gap-2">

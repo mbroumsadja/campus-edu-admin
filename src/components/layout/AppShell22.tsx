@@ -62,7 +62,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-display font-bold text-sm"
-              style={{ background: 'rgba(165,180,252,0.2)' }}>
+            style={{ background: 'linear-gradient(135deg, var(--brand-soft), var(--brand-light))' }}>
               U
             </div>
             <span className="text-white font-display font-semibold">campus-edu</span>
@@ -77,8 +77,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <div className="px-4 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <div className="flex items-center gap-3 px-2 py-2 rounded-xl"
             style={{ background: 'rgba(255,255,255,0.04)' }}>
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-indigo-900 font-semibold text-sm flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #a5b4fc, #818cf8)' }}>
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0"
+            style={{ background: `linear-gradient(135deg, var(--brand-soft), var(--brand))` }}>
               {initials}
             </div>
             <div className="min-w-0">
@@ -166,8 +166,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full"
             style={{
               background: isAdmin ? '#eef2ff' : 'var(--surface-2)',
-              color:      isAdmin ? '#4338ca' : 'var(--text-2)',
-              border:     `1px solid ${isAdmin ? '#c7d2fe' : 'var(--border)'}`,
+              color:      isAdmin ? 'var(--brand-strong)' : 'var(--text-2)',
+              border:     `1px solid ${isAdmin ? 'rgba(13,110,253,0.12)' : 'var(--border)'}`,
             }}>
             <GraduationCap size={12} />
             {roleLabel[user?.role ?? 'etudiant']}

@@ -23,6 +23,12 @@ export default function CoursPage() {
   const [type,         setType]         = useState('')
   const [ueId,         setUeId]         = useState('')
   const [uploadOpen,   setUploadOpen]   = useState(false)
+  const [editingCoursId, setEditingCoursId] = useState<number | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editType, setEditType] = useState<'pdf' | 'video' | 'slide' | 'autre'>('pdf')
+  const [editMainFile, setEditMainFile] = useState<File | null>(null)
+  const [editDocs, setEditDocs] = useState<File[]>([])
 
   const { data: filieresRaw } = useQuery(filieresService.list)
   const filieres = (filieresRaw as unknown as { data: Filiere[] })?.data ?? []
@@ -36,6 +42,54 @@ export default function CoursPage() {
     }),
     { search, type, ueId }
   )
+
+  const isOwner = (cours: Cours) => isAdmin || user?.id === cours.enseignant?.id
+
+  const openEditCours = (cours: Cours) => {
+    setEditingCoursId(cours.id)
+    setEditTitle(cours.titre)
+    setEditDescription(cours.description ?? '')
+    setEditType(cours.type)
+  }
+
+  const handleDeleteCours = async (id: number) => {
+    if (!window.confirm('Supprimer ce cours ?')) return
+    try {
+      await coursService.supprimer(id)
+      setEditingCoursId(null)
+      refetch()
+    } catch (err) {
+      console.error('Erreur suppression cours:', err)
+      alert('Impossible de supprimer ce cours.')
+    }
+  }
+
+  const handleUpdateCours = async (id: number) => {
+    try {
+      // Si des fichiers sont fournis, utiliser FormData
+      if (editMainFile || editDocs.length > 0) {
+        const fd = new FormData()
+        fd.append('titre', editTitle.trim())
+        fd.append('description', editDescription.trim())
+        fd.append('type', editType)
+        if (editMainFile) fd.append('main', editMainFile)
+        editDocs.forEach((f: File) => fd.append('documents', f))
+        await coursService.update(id, fd)
+      } else {
+        await coursService.update(id, {
+          titre: editTitle.trim(),
+          description: editDescription.trim(),
+          type: editType,
+        })
+      }
+
+      setEditingCoursId(null)
+      refetch()
+    } catch (err) {
+      console.error('Erreur modification cours:', err)
+      alert('Impossible de modifier ce cours.')
+    }
+  }
 
 // dans handleDownload, ajouter un paramètre documentId
 const handleDownload = async (coursId: number, documentId: number, titre: string) => {
@@ -159,6 +213,66 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
                     )}
                   </div>
                 </div>
+
+                {isOwner(cours) && (
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={() => openEditCours(cours)}
+                      className="text-xs font-medium px-2.5 py-1.5 rounded-lg border"
+                      style={{ borderColor: 'var(--border)', color: 'var(--text-2)', background: 'var(--surface-2)' }}>
+                      Modifier
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCours(cours.id)}
+                      className="text-xs font-medium px-2.5 py-1.5 rounded-lg border"
+                      style={{ borderColor: 'rgba(220,38,38,.2)', color: '#b91c1c', background: 'rgba(220,38,38,.06)' }}>
+                      Supprimer
+                    </button>
+                  </div>
+                )}
+
+                {editingCoursId === cours.id && isOwner(cours) && (
+                  <div className="rounded-xl p-3 space-y-2" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+                    <input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="w-full rounded-lg px-2.5 py-2 text-sm border outline-none"
+                      style={{ borderColor: 'var(--border)', background: 'white' }}
+                      placeholder="Titre du cours"
+                    />
+                    <textarea
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      rows={2}
+                      className="w-full rounded-lg px-2.5 py-2 text-sm border outline-none resize-none"
+                      style={{ borderColor: 'var(--border)', background: 'white' }}
+                      placeholder="Description"
+                    />
+                    <select
+                      value={editType}
+                      onChange={(e) => setEditType(e.target.value as 'pdf' | 'video' | 'slide' | 'autre')}
+                      className="w-full rounded-lg px-2.5 py-2 text-sm border outline-none"
+                      style={{ borderColor: 'var(--border)', background: 'white' }}
+                    >
+                      <option value="pdf">PDF</option>
+                      <option value="video">Vidéo</option>
+                      <option value="slide">Slides</option>
+                      <option value="autre">Autre</option>
+                    </select>
+
+                    <div className="space-y-2">
+                      <label className="text-xs">Remplacer le fichier principal</label>
+                      <input type="file" accept="application/pdf,video/*,application/vnd.openxmlformats-officedocument.presentationml.presentation" onChange={(e) => setEditMainFile(e.target.files?.[0] ?? null)} />
+                      <label className="text-xs">Ajouter des documents</label>
+                      <input type="file" multiple onChange={(e) => setEditDocs(e.target.files ? Array.from(e.target.files) : [])} />
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button onClick={() => setEditingCoursId(null)} className="text-xs px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>Annuler</button>
+                      <button onClick={() => handleUpdateCours(cours.id)} className="text-xs px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--brand)', color: 'white' }}>Enregistrer</button>
+                    </div>
+                  </div>
+                )}
 
                 {/* UE info */}
                 {cours.ue && (

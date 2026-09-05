@@ -43,7 +43,7 @@ export default function UploadSujetModal({ open, onClose, onSuccess }: Props) {
 
   useEffect(() => {
     if (!filiereId) { setUes([]); setUeId(''); return }
-    filieresService.ues(parseInt(filiereId)).then(r => {
+    filieresService.ues(parseInt(filiereId, 10)).then(r => {
       setUes((r.data as { data: UE[] }).data)
       setUeId('')
     }).catch(() => {})
@@ -54,7 +54,7 @@ export default function UploadSujetModal({ open, onClose, onSuccess }: Props) {
     if (!titre.trim())   e.titre       = 'Le titre est obligatoire'
     if (!ueId)           e.ueId        = 'Veuillez sélectionner une UE'
     if (!fichierSujet)   e.fichierSujet = 'Le fichier sujet est obligatoire'
-    if (annee && (parseInt(annee) < 2000 || parseInt(annee) > 2099)) e.annee = 'Année invalide'
+    if (annee && (parseInt(annee, 10) < 2000 || parseInt(annee, 10) > 2099)) e.annee = 'Année invalide'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -67,7 +67,9 @@ export default function UploadSujetModal({ open, onClose, onSuccess }: Props) {
     try {
       setUploadStep('Envoi du sujet…')
       const filesToUpload = fichierCorrige ? [fichierSujet!, fichierCorrige] : [fichierSujet!]
-      const [sujetUploade, corrigeUploade] = await uploaderFichiers(filesToUpload)
+      const results = await uploaderFichiers(filesToUpload)
+      const sujetUploade = results[0]
+      const corrigeUploade = results[1]
 
       setUploadStep('Enregistrement…')
       await sujetsService.create({
@@ -112,7 +114,7 @@ export default function UploadSujetModal({ open, onClose, onSuccess }: Props) {
       footer={
         <>
           <Button variant="ghost" onClick={handleClose} disabled={loading}>Annuler</Button>
-          <Button onClick={handleSubmit} loading={loading}>
+          <Button onClick={handleSubmit} loading={loading} disabled={loading}>
             {loading ? (uploadStep || 'Dépôt en cours…') : 'Déposer le sujet'}
           </Button>
         </>

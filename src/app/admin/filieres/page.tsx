@@ -236,14 +236,14 @@ function FiliereCard({
         className="flex items-center gap-4 p-5 cursor-pointer hover:bg-gray-50/50 transition-colors select-none"
         onClick={toggleExpand}>
         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: 'linear-gradient(135deg, #eef2ff, #ddd6fe)' }}>
+          style={{ background: 'linear-gradient(135deg, var(--brand-soft), rgba(221,214,254,0.6))' }}>
           <FolderOpen size={18} style={{ color: 'var(--brand)' }} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h3 className="font-display font-semibold text-gray-900">{filiere.nom}</h3>
             <span className="text-xs font-mono px-2 py-0.5 rounded-md"
-              style={{ background: '#eef2ff', color: 'var(--brand)' }}>
+              style={{ background: 'var(--brand-soft)', color: 'var(--brand)' }}>
               {filiere.code}
             </span>
           </div>
@@ -256,7 +256,7 @@ function FiliereCard({
           <button
             onClick={(e) => { e.stopPropagation(); onAddUE(filiere) }}
             className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
-            style={{ background: '#eef2ff', color: 'var(--brand)', border: '1px solid #c7d2fe' }}>
+            style={{ background: 'var(--brand-soft)', color: 'var(--brand)', border: '1px solid rgba(13,110,253,0.12)' }}>
             <Plus size={12} /> UE
           </button>
           {expanded

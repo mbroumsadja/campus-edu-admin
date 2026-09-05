@@ -119,7 +119,7 @@ export function FileInput({ label, accept, onChange, file, error, hint, required
       <label className="flex flex-col items-center justify-center gap-2 w-full py-6 rounded-xl cursor-pointer transition-all"
         style={{
           border:      `2px dashed ${error ? 'var(--red)' : file ? 'var(--brand)' : 'var(--border-2)'}`,
-          background:  file ? '#eef2ff' : 'var(--bg)',
+          background:  file ? 'var(--brand-soft)' : 'var(--bg)',
         }}>
         <input
           type="file" accept={accept} className="hidden"

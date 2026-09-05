@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title:       'campus-edu',
   description: 'Accédez à vos cours et sujets d\'examen',
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
-  themeColor: '#1d4ed8',
+  themeColor: '#0d6efd',
   icons: [
     { rel: 'icon', url: '/favicon.ico' },
     { rel: 'icon', url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
