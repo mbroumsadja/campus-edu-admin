@@ -18,22 +18,28 @@ export default function DashboardPage() {
   const { user, isAdmin, isEnseignant } = useAuth()
 
   const { data: coursData,  loading: cLoading } = useQuery<CoursListData>(
-    () => coursService.list({ limit: 4, page: 1 }) as never
+  () => coursService.list({ limit: 1000, page: 1 }) as never
   )
   const { data: sujetsData, loading: sLoading } = useQuery<SujetListData>(
-    () => sujetsService.list({ limit: 4, page: 1 }) as never
+  () => sujetsService.list({ limit: 1000, page: 1 }) as never
   )
   const { data: filieres } = useQuery(filieresService.list)
 
-  const cours  = (coursData  as unknown as {
-    length: number; data: Cours[];  pagination: { total: number } 
+const cours = (coursData as unknown as {
+  data: Cours[]; pagination: { total: number }
 })
   const sujets = (sujetsData as unknown as {
-    length: number; data: Sujet[];  pagination: { total: number } 
+  data: Sujet[]; pagination: { total: number }
 })
 
-  const greetHour = new Date().getHours()
-  const greet = greetHour < 12 ? 'Bonjour' : greetHour < 18 ? 'Bon après-midi' : 'Bonsoir'
+const recentCours = cours?.data ?? []
+const recentSujets = sujets?.data ?? []
+const totalCours = cours?.pagination?.total ?? recentCours.length
+const totalSujets = sujets?.pagination?.total ?? recentSujets.length
+const totalTelechargements = recentCours.reduce((sum, c) => sum + (c.telechargemements ?? 0), 0)
+
+const greetHour = new Date().getHours()
+const greet = greetHour < 12 ? 'Bonjour' : greetHour < 18 ? 'Bon après-midi' : 'Bonsoir'
  
   return (
     <AppShell>
@@ -54,7 +60,7 @@ export default function DashboardPage() {
         {[
           {
             label: 'Cours disponibles',
-            value: cLoading ? '…' : (cours?.length ?? 0),
+            value: cLoading ? '…' : totalCours,
             icon:  BookOpen,
             color: '#5b5ef4',
             bg:    '#eef2ff',
@@ -63,7 +69,7 @@ export default function DashboardPage() {
           },
           {
             label: 'Anciens sujets',
-            value: sLoading ? '…' : (sujets?.length ?? 0),
+            value: sLoading ? '…' : totalSujets,
             icon:  FileText,
             color: '#0891b2',
             bg:    '#ecfeff',
@@ -83,7 +89,7 @@ export default function DashboardPage() {
           },
           {
             label: 'Total téléchargements',
-            value: cLoading ? '…' : ((cours ?? []) as unknown as Cours[]).reduce((a, c) => a + c.telechargemements, 0),
+            value: cLoading ? '…' : totalTelechargements,
             icon:  Download,
             color: '#059669',
             bg:    '#ecfdf5',
@@ -121,11 +127,11 @@ export default function DashboardPage() {
           <div className="space-y-3">
             {cLoading
               ? Array(3).fill(0).map((_, i) => <SkeletonCard key={i} />)
-              : ((cours ?? []) as unknown as Cours[]).length === 0
+              : recentCours.length === 0
                 ? <Card className="p-6 text-center text-sm text-gray-500">
                     Aucun cours disponible
                   </Card>
-                : ((cours ?? []) as unknown as Cours[]).map((c) => (
+                : recentCours.map((c) => (
                   <Link href={`/cours?ue=${c.ue?.id ?? ''}`} key={c.id}>
                     <Card className="p-4 hover:translate-y-[-1px] mb-2">
                       <div className="flex items-start gap-3">
@@ -169,11 +175,11 @@ export default function DashboardPage() {
           <div className="space-y-3">
             {sLoading
               ? Array(3).fill(0).map((_, i) => <SkeletonCard key={i} />)
-              : ((sujets ?? []) as unknown as Sujet[]).length === 0
+              : recentSujets.length === 0
                 ? <Card className="p-6 text-center text-sm">
                     Aucun sujet disponible
                   </Card>
-                : ((sujets ?? []) as unknown as Sujet[]).map((s) => (
+                : recentSujets.map((s) => (
                   <Link href={`/sujets?ue=${s.ue?.id ?? ''}`} key={s.id}>
                     <Card className="p-4 hover:translate-y-[-1px] mb-2">
                       <div className="flex items-start gap-3">
