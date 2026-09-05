@@ -14,6 +14,19 @@ const ADMIN_ROUTES   = ['/admin']
 // Routes réservées aux enseignants et admins
 const TEACHER_ROUTES = ['/cours/nouveau', '/sujets/nouveau']
 
+const decodeJwtPayload = (token: string) => {
+  const [, base64UrlPayload = ''] = token.split('.')
+  if (!base64UrlPayload) throw new Error('Payload JWT absent')
+
+  const normalized = base64UrlPayload
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
+    .padEnd(Math.ceil(base64UrlPayload.length / 4) * 4, '=')
+
+  const decoded = atob(normalized)
+  return JSON.parse(decoded)
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -39,7 +52,7 @@ export function middleware(request: NextRequest) {
   // 3. Décoder le JWT (sans vérification de signature — edge runtime)
   //    La vraie vérification de signature se fait côté API
   try {
-    const payload    = JSON.parse(atob(accessToken.split('.')[1]))
+    const payload = decodeJwtPayload(accessToken)
     const role: string = payload.role ?? 'etudiant'
 
     // Routes admin : seuls les admins peuvent accéder

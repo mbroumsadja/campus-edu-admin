@@ -3,7 +3,7 @@
 // Contexte d'authentification global — wraps l'app entière
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { authService, setTokens, clearTokens, getAccessToken } from './api'
+import { authService, setTokens, clearTokens, getAccessToken, unwrapApiData } from './api'
 import type { AuthUser } from '@/types'
 
 interface AuthContextType {
@@ -32,7 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return
         }
         const { data } = await authService.me()
-        setUser(data.data)
+        const userPayload = unwrapApiData<AuthUser | null>(data)
+        setUser(userPayload)
       } catch {
         setUser(null)
       } finally {
@@ -44,9 +45,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (matricule: string, password: string) => {
     const { data } = await authService.login(matricule, password)
-    const { accessToken, refreshToken, utilisateur } = data.data
+    const payload = unwrapApiData<{
+      accessToken?: string
+      refreshToken?: string
+      user?: AuthUser
+      utilisateur?: AuthUser
+    }>(data)
+
+    const accessToken = payload.accessToken
+    const refreshToken = payload.refreshToken
+    const userData = payload.user ?? payload.utilisateur
+
+    if (!accessToken || !refreshToken) {
+      throw new Error('Réponse de connexion invalide')
+    }
+
     setTokens(accessToken, refreshToken)
-    setUser(utilisateur)
+    setUser(userData ?? null)
   }
 
   const logout = async () => {

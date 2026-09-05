@@ -16,6 +16,17 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+export const unwrapApiData = <T>(payload: unknown): T => {
+  if (!payload || typeof payload !== 'object') return payload as T
+
+  const candidate = payload as Record<string, unknown>
+  if ('data' in candidate && candidate.data !== undefined && candidate.data !== null) {
+    return candidate.data as T
+  }
+
+  return payload as T
+}
+
 // ── Helpers tokens — double stockage Cookie + localStorage ─────────
 // On utilise les deux pour fiabilité maximale (SSR + CSR)
 export const setTokens = (accessToken: string, refreshToken: string) => {
@@ -99,7 +110,14 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken })
-        const { accessToken, refreshToken: newRefresh } = data.data
+        const payload = unwrapApiData<{ accessToken?: string; refreshToken?: string }>(data)
+        const accessToken = payload.accessToken
+        const newRefresh = payload.refreshToken
+
+        if (!accessToken || !newRefresh) {
+          throw new Error('Réponse de refresh invalide')
+        }
+
         setTokens(accessToken, newRefresh)
         processQueue(null, accessToken)
         originalRequest.headers.Authorization = `Bearer ${accessToken}`
