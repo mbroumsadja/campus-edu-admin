@@ -108,6 +108,196 @@ function CreateFiliereModal({ open, onClose, onSuccess }: {
 }
 
 // ── Modal UE ──────────────────────────────────────────────────────
+function EditFiliereModal({ open, onClose, onSuccess, filiere }: {
+  open: boolean; onClose: () => void; onSuccess: () => void
+  filiere: Filiere | null
+}) {
+  const [code, setCode] = useState('')
+  const [nom, setNom] = useState('')
+  const [departement, setDepartement] = useState('')
+  const [ecoleId, setEcoleId] = useState('')
+  const [ecoles, setEcoles] = useState<Ecole[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    ecolesService.list()
+      .then(r => setEcoles((r.data as { data: Ecole[] }).data))
+      .catch(() => undefined)
+  }, [])
+
+  useEffect(() => {
+    if (open && filiere) {
+      setCode(filiere.code ?? '')
+      setNom(filiere.nom ?? '')
+      setDepartement(filiere.departement ?? '')
+      setEcoleId(String(filiere.ecole_id ?? ''))
+      setError('')
+    }
+  }, [open, filiere])
+
+  const handleSubmit = async () => {
+    if (!filiere || !code.trim() || !nom.trim() || !ecoleId) {
+      setError('Code, nom et école sont obligatoires')
+      return
+    }
+    setLoading(true); setError('')
+    try {
+      await filieresService.update(filiere.id, {
+        code: code.trim().toUpperCase(),
+        nom: nom.trim(),
+        departement: departement.trim(),
+        ecole_id: parseInt(ecoleId, 10),
+      })
+      onSuccess()
+    } catch (err) {
+      const e = err as AxiosError<{ message: string }>
+      setError(e.response?.data?.message || 'Erreur lors de la modification')
+    } finally { setLoading(false) }
+  }
+
+  return (
+    <Modal open={open} onClose={onClose} title="Modifier la filière" size="sm"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={loading}>Annuler</Button>
+          <Button onClick={handleSubmit} loading={loading}>Enregistrer</Button>
+        </>
+      }>
+      <div className="space-y-4">
+        {error && (
+          <div className="px-4 py-3 rounded-xl text-sm"
+            style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b' }}>
+            {error}
+          </div>
+        )}
+        <FormField label="École" required>
+          <Select
+            value={ecoleId}
+            onChange={e => setEcoleId(e.target.value)}
+            placeholder="Sélectionnez une école"
+            options={ecoles.map(ecole => ({ value: String(ecole.id), label: ecole.ecole }))}
+          />
+        </FormField>
+        <FormField label="Code" required hint="Ex : INFO, MATH, GC">
+          <Input value={code} onChange={e => setCode(e.target.value.toUpperCase())}
+            placeholder="INFO" style={{ fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }} />
+        </FormField>
+        <FormField label="Nom complet" required>
+          <Input value={nom} onChange={e => setNom(e.target.value)} placeholder="Informatique" />
+        </FormField>
+        <FormField label="Département">
+          <Input value={departement} onChange={e => setDepartement(e.target.value)}
+            placeholder="Sciences & Technologies" />
+        </FormField>
+      </div>
+    </Modal>
+  )
+}
+
+function EditUEModal({ open, onClose, onSuccess, filiereId, ue }: {
+  open: boolean; onClose: () => void; onSuccess: () => void
+  filiereId: number; ue: UE | null
+}) {
+  const [code, setCode] = useState('')
+  const [intitule, setIntitule] = useState('')
+  const [niveau, setNiveau] = useState('L1')
+  const [semestre, setSemestre] = useState('S1')
+  const [credits, setCredits] = useState('3')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const SEMESTRES_BY_NIVEAU: Record<string, string[]> = {
+    L1: ['S1', 'S2'], L2: ['S3', 'S4'], L3: ['S5', 'S6'],
+    M1: ['S7', 'S8'], M2: ['S9', 'S10'],
+  }
+
+  const semestresDispos = SEMESTRES_BY_NIVEAU[niveau] ?? ['S1', 'S2']
+
+  useEffect(() => {
+    if (open && ue) {
+      setCode(ue.code ?? '')
+      setIntitule(ue.intitule ?? '')
+      setNiveau(ue.niveau ?? 'L1')
+      setSemestre(ue.semestre ?? 'S1')
+      setCredits(String(ue.credits ?? 3))
+      setError('')
+    }
+  }, [open, ue])
+
+  const handleNiveauChange = (n: string) => {
+    setNiveau(n)
+    setSemestre(SEMESTRES_BY_NIVEAU[n]?.[0] ?? 'S1')
+  }
+
+  const handleSubmit = async () => {
+    if (!ue || !code.trim() || !intitule.trim()) {
+      setError('Code et intitulé sont obligatoires')
+      return
+    }
+    setLoading(true); setError('')
+    try {
+      await filieresService.updateUE(filiereId, ue.id, {
+        code: code.trim().toUpperCase(),
+        intitule: intitule.trim(),
+        niveau,
+        semestre,
+        credits: parseInt(credits) || 3,
+      })
+      onSuccess()
+    } catch (err) {
+      const e = err as AxiosError<{ message: string }>
+      setError(e.response?.data?.message || 'Erreur lors de la modification')
+    } finally { setLoading(false) }
+  }
+
+  return (
+    <Modal open={open} onClose={onClose} title="Modifier l&apos;UE" size="md"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={loading}>Annuler</Button>
+          <Button onClick={handleSubmit} loading={loading}>Enregistrer</Button>
+        </>
+      }>
+      <div className="space-y-5">
+        {error && (
+          <div className="px-4 py-3 rounded-xl text-sm"
+            style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b' }}>
+            {error}
+          </div>
+        )}
+        <FormSection title="Identification">
+          <FormField label="Code" required hint="Ex : INFO301, MATH201">
+            <Input value={code} onChange={e => setCode(e.target.value.toUpperCase())}
+              placeholder="INFO301"
+              style={{ fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }} />
+          </FormField>
+          <FormField label="Intitulé" required>
+            <Input value={intitule} onChange={e => setIntitule(e.target.value)}
+              placeholder="Algorithmique avancée" />
+          </FormField>
+        </FormSection>
+
+        <FormSection title="Niveau & Crédits">
+          <FormRow>
+            <FormField label="Niveau">
+              <Select value={niveau} onChange={e => handleNiveauChange(e.target.value)}
+                options={['L1','L2','L3','M1','M2'].map(v => ({ value: v, label: v }))} />
+            </FormField>
+            <FormField label="Semestre">
+              <Select value={semestre} onChange={e => setSemestre(e.target.value)}
+                options={semestresDispos.map(s => ({ value: s, label: s }))} />
+            </FormField>
+          </FormRow>
+          <FormField label="Crédits ECTS">
+            <Input type="number" value={credits} onChange={e => setCredits(e.target.value)} min="1" max="10" />
+          </FormField>
+        </FormSection>
+      </div>
+    </Modal>
+  )
+}
+
 function CreateUEModal({ open, onClose, onSuccess, filiereId, filiereName }: {
   open: boolean; onClose: () => void; onSuccess: () => void
   filiereId: number; filiereName: string
@@ -202,11 +392,15 @@ function CreateUEModal({ open, onClose, onSuccess, filiereId, filiereName }: {
 
 // ── Carte filière expandable ──────────────────────────────────────
 function FiliereCard({
-  filiere, onAddUE, onRefresh,
+  filiere, onAddUE, onRefresh, onEditFiliere, onDeleteFiliere, onEditUE, onDeleteUE,
 }: {
   filiere: Filiere
   onAddUE: (f: Filiere) => void
   onRefresh: () => void
+  onEditFiliere: (f: Filiere) => void
+  onDeleteFiliere: (f: Filiere) => void
+  onEditUE: (filiereId: number, ue: UE) => void
+  onDeleteUE: (filiereId: number, ue: UE) => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const [ues, setUes]           = useState<UE[]>([])
@@ -252,11 +446,23 @@ function FiliereCard({
           )}
         </div>
 
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={(e) => { e.stopPropagation(); onEditFiliere(filiere) }}
+            className="text-xs font-medium px-2.5 py-1.5 rounded-lg transition-all"
+            style={{ background: '#eef2ff', color: '#312e81', border: '1px solid rgba(99,102,241,.18)' }}>
+            Modifier
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDeleteFiliere(filiere) }}
+            className="text-xs font-medium px-2.5 py-1.5 rounded-lg transition-all"
+            style={{ background: '#fef2f2', color: '#b91c1c', border: '1px solid rgba(239,68,68,.18)' }}>
+            Supprimer
+          </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAddUE(filiere) }}
             className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
-            style={{ background: 'var(--brand-soft)', color: 'var(--brand)', border: '1px solid rgba(13,110,253,0.12)' }}>
+            style={{ background: 'var(--brand-soft)', color: 'var(--brand)', border: '1px solid rgba(11,63,138,0.12)' }}>
             <Plus size={12} /> UE
           </button>
           {expanded
@@ -318,6 +524,20 @@ function FiliereCard({
                             {ue.semestre}
                           </span>
                         </div>
+                        <div className="flex items-center gap-2 ml-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onEditUE(filiere.id, ue) }}
+                            className="text-[11px] font-medium px-2 py-1 rounded-md"
+                            style={{ background: '#eef2ff', color: '#312e81', border: '1px solid rgba(99,102,241,.18)' }}>
+                            Modifier
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onDeleteUE(filiere.id, ue) }}
+                            className="text-[11px] font-medium px-2 py-1 rounded-md"
+                            style={{ background: '#fef2f2', color: '#b91c1c', border: '1px solid rgba(239,68,68,.18)' }}>
+                            Supprimer
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -334,8 +554,10 @@ function FiliereCard({
 // ── Page principale ───────────────────────────────────────────────
 export default function AdminFilieresPage() {
   const [filiereModalOpen, setFiliereModalOpen] = useState(false)
-  const [ueModalOpen,      setUeModalOpen]      = useState(false)
-  const [selectedFiliere,  setSelectedFiliere]  = useState<Filiere | null>(null)
+  const [ueModalOpen, setUeModalOpen] = useState(false)
+  const [selectedFiliere, setSelectedFiliere] = useState<Filiere | null>(null)
+  const [editingFiliere, setEditingFiliere] = useState<Filiere | null>(null)
+  const [editingUE, setEditingUE] = useState<{ filiereId: number; ue: UE } | null>(null)
 
   const { data: raw, loading, error, refetch } = useQuery(filieresService.list)
   const filieres: Filiere[] = (raw as unknown as Filiere[]) ?? []
@@ -343,6 +565,26 @@ export default function AdminFilieresPage() {
   const handleAddUE = (filiere: Filiere) => {
     setSelectedFiliere(filiere)
     setUeModalOpen(true)
+  }
+
+  const handleDeleteFiliere = async (filiere: Filiere) => {
+    if (!window.confirm(`Supprimer la filière ${filiere.nom} ?`)) return
+    try {
+      await filieresService.delete(filiere.id)
+      refetch()
+    } catch {
+      alert('Erreur lors de la suppression de la filière')
+    }
+  }
+
+  const handleDeleteUE = async (filiereId: number, ue: UE) => {
+    if (!window.confirm(`Supprimer l'UE ${ue.code} ?`)) return
+    try {
+      await filieresService.deleteUE(filiereId, ue.id)
+      refetch()
+    } catch {
+      alert('Erreur lors de la suppression de l\'UE')
+    }
   }
 
   return (
@@ -396,7 +638,15 @@ export default function AdminFilieresPage() {
         <div className="space-y-4">
           {filieres.map((f, idx) => (
             <div key={f.id} className="animate-fade-up" style={{ animationDelay: `${idx * 60}ms` }}>
-              <FiliereCard filiere={f} onAddUE={handleAddUE} onRefresh={refetch} />
+              <FiliereCard
+                filiere={f}
+                onAddUE={handleAddUE}
+                onRefresh={refetch}
+                onEditFiliere={setEditingFiliere}
+                onDeleteFiliere={handleDeleteFiliere}
+                onEditUE={(filiereId, ue) => setEditingUE({ filiereId, ue })}
+                onDeleteUE={handleDeleteUE}
+              />
             </div>
           ))}
         </div>
@@ -416,6 +666,23 @@ export default function AdminFilieresPage() {
           onSuccess={() => { setUeModalOpen(false); refetch() }}
           filiereId={selectedFiliere.id}
           filiereName={selectedFiliere.nom}
+        />
+      )}
+
+      <EditFiliereModal
+        open={Boolean(editingFiliere)}
+        onClose={() => setEditingFiliere(null)}
+        onSuccess={() => { setEditingFiliere(null); refetch() }}
+        filiere={editingFiliere}
+      />
+
+      {editingUE && (
+        <EditUEModal
+          open={Boolean(editingUE)}
+          onClose={() => setEditingUE(null)}
+          onSuccess={() => { setEditingUE(null); refetch() }}
+          filiereId={editingUE.filiereId}
+          ue={editingUE.ue}
         />
       )}
     </AppShell>

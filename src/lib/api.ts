@@ -215,8 +215,14 @@ export const filieresService = {
   ues:      (id: number, niveau?: string) =>
     api.get(`/filieres/${id}/ues`, { params: niveau ? { niveau } : {} }),
   create:   (data: unknown) => api.post('/filieres', data),
+  update:   (id: number, data: unknown) => api.put(`/filieres/${id}`, data),
+  delete:   (id: number) => api.delete(`/filieres/${id}`),
   creerUE:  (filiereId: number, data: unknown) =>
     api.post(`/filieres/${filiereId}/ues`, data),
+  updateUE: (filiereId: number, ueId: number, data: unknown) =>
+    api.put(`/filieres/${filiereId}/ues/${ueId}`, data),
+  deleteUE: (filiereId: number, ueId: number) =>
+    api.delete(`/filieres/${filiereId}/ues/${ueId}`),
 }
 
 export const ecolesService = {
