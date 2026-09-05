@@ -10,12 +10,12 @@
   --font-body:    'IBM Plex Sans', sans-serif;
   --font-mono:    'IBM Plex Mono', monospace;
 
-  /* Brand — campus edu (primary + accent) */
-  --brand:        #0b3f8a;     /* bleu principal plus foncé */
+  /* Brand — campus edu (palette synchronisée) */
+  --brand:        #0b3f8a;     /* bleu principal */
   --brand-strong: #082d5c;     /* bleu profond */
-  --brand-soft:   #dfeeff;     /* fond clair subtil */
-  --brand-light:  #73a7ef;     /* surlignage */
-  --brand-alt:    #3b82f6;     /* accent secondaire */
+  --brand-soft:   #eaf3ff;     /* fond clair subtil */
+  --brand-light:  #93bdfd;     /* surlignage */
+  --brand-alt:    #2563eb;     /* accent secondaire */
   --accent-soft:  rgba(11,63,138,0.08); /* accent subtil */
 
   /* Surfaces */

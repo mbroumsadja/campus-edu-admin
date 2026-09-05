@@ -215,16 +215,16 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
                 </div>
 
                 {isOwner(cours) && (
-                  <div className="flex gap-2 justify-end">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
                     <button
                       onClick={() => openEditCours(cours)}
-                      className="text-xs font-medium px-2.5 py-1.5 rounded-lg border"
+                      className="w-full sm:w-auto text-xs font-medium px-2.5 py-1.5 rounded-lg border"
                       style={{ borderColor: 'var(--border)', color: 'var(--text-2)', background: 'var(--surface-2)' }}>
                       Modifier
                     </button>
                     <button
                       onClick={() => handleDeleteCours(cours.id)}
-                      className="text-xs font-medium px-2.5 py-1.5 rounded-lg border"
+                      className="w-full sm:w-auto text-xs font-medium px-2.5 py-1.5 rounded-lg border"
                       style={{ borderColor: 'rgba(220,38,38,.2)', color: '#b91c1c', background: 'rgba(220,38,38,.06)' }}>
                       Supprimer
                     </button>
@@ -267,9 +267,9 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
                       <input type="file" multiple onChange={(e) => setEditDocs(e.target.files ? Array.from(e.target.files) : [])} />
                     </div>
 
-                    <div className="flex justify-end gap-2 pt-1">
-                      <button onClick={() => setEditingCoursId(null)} className="text-xs px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>Annuler</button>
-                      <button onClick={() => handleUpdateCours(cours.id)} className="text-xs px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--brand)', color: 'white' }}>Enregistrer</button>
+                    <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end">
+                      <button onClick={() => setEditingCoursId(null)} className="w-full sm:w-auto text-xs px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>Annuler</button>
+                      <button onClick={() => handleUpdateCours(cours.id)} className="w-full sm:w-auto text-xs px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--brand)', color: 'white' }}>Enregistrer</button>
                     </div>
                   </div>
                 )}

@@ -39,15 +39,15 @@ export default function LoginPage() {
 
       {/* ── Panneau gauche : illustration / branding ── */}
       <div className="hidden lg:flex lg:w-[52%] flex-col justify-between p-12 relative overflow-hidden"
-        style={{ background: 'linear-gradient(145deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%)' }}>
+        style={{ background: 'linear-gradient(145deg, var(--brand-strong) 0%, var(--brand) 42%, var(--brand-alt) 100%)' }}>
 
         {/* Formes décoratives */}
         <div className="absolute top-[-80px] right-[-80px] w-[400px] h-[400px] rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #818cf8, transparent)' }} />
+          style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.6), transparent)' }} />
         <div className="absolute bottom-[-60px] left-[-60px] w-[300px] h-[300px] rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #6366f1, transparent)' }} />
+          style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.5), transparent)' }} />
         <div className="absolute top-1/3 left-1/4 w-1 h-32 opacity-20"
-          style={{ background: 'linear-gradient(to bottom, transparent, #a5b4fc, transparent)' }} />
+          style={{ background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.7), transparent)' }} />
 
         {/* Logo */}
         <div className="relative z-10">
@@ -65,9 +65,9 @@ export default function LoginPage() {
           <div className="space-y-4">
             <h1 className="text-white font-display text-4xl font-bold leading-tight text-balance">
               Vos cours et examens,<br />
-              <span style={{ color: '#a5b4fc' }}>toujours accessibles.</span>
+              <span style={{ color: 'rgba(255,255,255,0.82)' }}>toujours accessibles.</span>
             </h1>
-            <p className="text-indigo-200 text-lg leading-relaxed max-w-md">
+            <p className="text-blue-100 text-lg leading-relaxed max-w-md">
               Retrouvez tous les cours, sujets d&apos;examens et ressources de votre filière en un seul endroit.
             </p>
           </div>
@@ -82,12 +82,12 @@ export default function LoginPage() {
               <div key={label} className="flex items-center gap-4"
                 style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 12, padding: '12px 16px' }}>
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(165,180,252,0.15)' }}>
-                  <Icon size={18} className="text-indigo-200" />
+                  style={{ background: 'rgba(255,255,255,0.12)' }}>
+                  <Icon size={18} className="text-blue-100" />
                 </div>
                 <div>
                   <p className="text-white text-sm font-medium">{label}</p>
-                  <p className="text-indigo-300 text-xs mt-0.5">{desc}</p>
+                  <p className="text-blue-50 text-xs mt-0.5">{desc}</p>
                 </div>
               </div>
             ))}
@@ -95,7 +95,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="relative z-10 text-indigo-400 text-sm">
+        <p className="relative z-10 text-blue-100 text-sm opacity-80">
           © {new Date().getFullYear()} campus-edu — Université publique
         </p>
       </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -28,8 +28,69 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [dragPosition, setDragPosition] = useState({ x: 12, y: 12 })
+  const dragRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 })
+  const dragMovedRef = useRef(false)
 
   const isAdmin = user?.role === 'admin'
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const maxX = Math.max(12, window.innerWidth - 220)
+    const maxY = Math.max(12, window.innerHeight - 260)
+    setDragPosition({ x: maxX, y: maxY })
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!dragRef.current.active) return
+
+      const dx = event.clientX - dragRef.current.startX
+      const dy = event.clientY - dragRef.current.startY
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+        dragMovedRef.current = true
+      }
+
+      const nextX = Math.min(Math.max(12, dragRef.current.originX + dx), window.innerWidth - 220)
+      const nextY = Math.min(Math.max(12, dragRef.current.originY + dy), window.innerHeight - 200)
+      setDragPosition({ x: nextX, y: nextY })
+    }
+
+    const handlePointerUp = () => {
+      dragRef.current.active = false
+    }
+
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', handlePointerUp)
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', handlePointerUp)
+    }
+  }, [])
+
+  const handleMobileToggle = () => {
+    if (dragMovedRef.current) {
+      dragMovedRef.current = false
+      return
+    }
+    setMenuOpen((prev) => !prev)
+  }
+
+  const handleDragStart = (event: React.PointerEvent<HTMLButtonElement>) => {
+    dragRef.current = {
+      active: true,
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: dragPosition.x,
+      originY: dragPosition.y,
+    }
+    dragMovedRef.current = false
+    event.preventDefault()
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
@@ -152,37 +213,54 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           )}
         </div>
 
-        {/* Mobile : bouton hamburger */}
-        <div className="md:hidden">
-          <button onClick={() => setMenuOpen(!menuOpen)} className="text-white/70 hover:text-white flex items-center justify-between px-4 h-11">
-            <span className="text-white/50 text-xs flex gap-1">
-              <Users size={13} />
-              {roleLabel[user?.role as keyof typeof roleLabel]}
-            </span>
-            {menuOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
-        </div>
+        {/* Mobile : menu flottant draggable */}
+        <div
+          className="md:hidden fixed z-50 select-none"
+          style={{
+            left: `${dragPosition.x}px`,
+            top: `${dragPosition.y}px`,
+            width: 'min(220px, calc(100vw - 24px))',
+          }}
+        >
+          <div
+            className="rounded-2xl shadow-2xl"
+            style={{ background: 'var(--brand-strong)', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <button
+              type="button"
+              onClick={handleMobileToggle}
+              onPointerDown={handleDragStart}
+              className="text-white/70 hover:text-white flex items-center justify-between w-full px-4 h-11 rounded-2xl"
+              style={{ touchAction: 'none' }}
+            >
+              <span className="text-white/70 text-xs flex items-center gap-1.5">
+                <Users size={13} />
+                {roleLabel[user?.role as keyof typeof roleLabel]}
+              </span>
+              {menuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
 
-        {/* Mobile : menu déroulant */}
-        {menuOpen && (
-          <div className="md:hidden px-4 pb-3 flex flex-col gap-1 ml-10">
-            {[...navMain, ...(isAdmin ? navAdmin : [])].map(({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setMenuOpen(false)}
-                className={clsx(
-                  'flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all',
-                  pathname === href
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
-                )}
-              >
-                <Icon size={14} /> {label}
-              </Link>
-            ))}
+            {menuOpen && (
+              <div className="px-3 pb-3 pt-1 flex flex-col gap-1">
+                {[...navMain, ...(isAdmin ? navAdmin : [])].map(({ href, label, icon: Icon }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMenuOpen(false)}
+                    className={clsx(
+                      'flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all',
+                      pathname === href
+                        ? 'bg-white/10 text-white'
+                        : 'text-white/60 hover:text-white hover:bg-white/5'
+                    )}
+                  >
+                    <Icon size={14} /> {label}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </nav>
 
       {/* ── CONTENU ── */}

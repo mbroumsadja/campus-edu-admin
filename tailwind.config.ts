@@ -18,14 +18,14 @@ const config: Config = {
       },
       colors: {
         brand: {
-          50:  '#e7f0ff',
-          100: '#d0e1ff',
-          200: '#a9c8ff',
-          400: '#3a8bfd',
-          500: '#0d6efd',
-          600: '#0b5ed7',
-          700: '#094eaf',
-          900: '#073067',
+          50:  '#edf5ff',
+          100: '#dfeeff',
+          200: '#bdd8ff',
+          400: '#3b82f6',
+          500: '#0b3f8a',
+          600: '#082d5c',
+          700: '#072750',
+          900: '#051d36',
         },
         surface: {
           0:   '#ffffff',
@@ -45,7 +45,7 @@ const config: Config = {
       boxShadow: {
         'card':   '0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04)',
         'card-hover': '0 4px 12px rgba(0,0,0,.10), 0 8px 32px rgba(0,0,0,.06)',
-        'brand':  '0 4px 20px rgba(99,102,241,.35)',
+        'brand':  '0 4px 20px rgba(11,63,138,.35)',
       },
       animation: {
         'fade-up':    'fadeUp 0.4s ease both',
