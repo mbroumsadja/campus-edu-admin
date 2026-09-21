@@ -10,6 +10,36 @@ import { BookOpen, FileText, Download, Eye, ArrowRight, GraduationCap } from 'lu
 import Link from 'next/link'
 import type { Cours, Filiere, Sujet } from '@/types'
 
+const normalizePaginatedResponse = <T,>(payload: unknown) => {
+  const source = payload && typeof payload === 'object' ? payload as Record<string, unknown> : {}
+  const items = Array.isArray(source.data)
+    ? source.data as T[]
+    : Array.isArray(payload)
+      ? payload as T[]
+      : []
+
+  const pagination = (source.pagination as Record<string, unknown> | undefined) ?? {
+    total: Number(source.total ?? items.length),
+    page: 1,
+    limit: items.length,
+    totalPages: 1,
+    hasNext: false,
+    hasPrev: false,
+  }
+
+  return {
+    data: items,
+    pagination: {
+      total: Number(pagination.total ?? items.length),
+      page: Number(pagination.page ?? 1),
+      limit: Number(pagination.limit ?? items.length),
+      totalPages: Number(pagination.totalPages ?? 1),
+      hasNext: Boolean(pagination.hasNext ?? false),
+      hasPrev: Boolean(pagination.hasPrev ?? false),
+    },
+  }
+}
+
 export default function DashboardPage() {
   const { user, isAdmin, isEnseignant } = useAuth()
 
@@ -17,15 +47,24 @@ export default function DashboardPage() {
     items: coursItems,
     pagination: coursPagination,
     loading: cLoading,
-  } = usePaginatedQuery<Cours>((page) => coursService.list({ page, limit: 1000 }))
+  } = usePaginatedQuery<Cours>(async (page) => {
+    const response = await coursService.list({ page, limit: 1000 })
+    return { data: normalizePaginatedResponse<Cours>(response.data) }
+  })
 
   const {
     items: sujetsItems,
     pagination: sujetsPagination,
     loading: sLoading,
-  } = usePaginatedQuery<Sujet>((page) => sujetsService.list({ page, limit: 1000 }))
+  } = usePaginatedQuery<Sujet>(async (page) => {
+    const response = await sujetsService.list({ page, limit: 1000 })
+    return { data: normalizePaginatedResponse<Sujet>(response.data) }
+  })
 
-  const { data: filieresRaw } = useQuery(filieresService.list)
+  const { data: filieresRaw } = useQuery(async () => {
+    const response = await filieresService.list()
+    return { data: { data: Array.isArray(response.data) ? response.data : response.data?.data ?? [] } }
+  })
   const filieres = (filieresRaw as unknown as Filiere[]) ?? []
 
   const recentCours = coursItems.slice(0, 4)
