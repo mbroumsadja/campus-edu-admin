@@ -3,40 +3,36 @@
 
 import { useAuth } from '@/lib/auth-context'
 import { coursService, sujetsService, filieresService } from '@/lib/api'
-import { useQuery } from '@/hooks/useQuery'
+import { usePaginatedQuery, useQuery } from '@/hooks/useQuery'
 import AppShell from '@/components/layout/AppShell'
-import { Card, StatutBadge, TypeCoursBADGE, SkeletonCard, PageHeader } from '@/components/ui'
+import { Card, StatutBadge, TypeCoursBADGE, SkeletonCard } from '@/components/ui'
 import { BookOpen, FileText, Download, Eye, ArrowRight, GraduationCap } from 'lucide-react'
 import Link from 'next/link'
-import type { Cours, Sujet } from '@/types'
-import { log } from 'util'
-
-interface CoursListData  { data: Cours[];  pagination: { total: number } }
-interface SujetListData  { data: Sujet[];  pagination: { total: number } }
+import type { Cours, Filiere, Sujet } from '@/types'
 
 export default function DashboardPage() {
   const { user, isAdmin, isEnseignant } = useAuth()
 
-  const { data: coursData,  loading: cLoading } = useQuery<CoursListData>(
-  () => coursService.list({ limit: 1000, page: 1 }) as never
-  )
-  const { data: sujetsData, loading: sLoading } = useQuery<SujetListData>(
-  () => sujetsService.list({ limit: 1000, page: 1 }) as never
-  )
-  const { data: filieres } = useQuery(filieresService.list)
+  const {
+    items: coursItems,
+    pagination: coursPagination,
+    loading: cLoading,
+  } = usePaginatedQuery<Cours>((page) => coursService.list({ page, limit: 1000 }))
 
-const cours = (coursData as unknown as {
-  data: Cours[]; pagination: { total: number }
-})
-  const sujets = (sujetsData as unknown as {
-  data: Sujet[]; pagination: { total: number }
-})
+  const {
+    items: sujetsItems,
+    pagination: sujetsPagination,
+    loading: sLoading,
+  } = usePaginatedQuery<Sujet>((page) => sujetsService.list({ page, limit: 1000 }))
 
-const recentCours = cours?.data ?? []
-const recentSujets = sujets?.data ?? []
-const totalCours = cours?.pagination?.total ?? recentCours.length
-const totalSujets = sujets?.pagination?.total ?? recentSujets.length
-const totalTelechargements = recentCours.reduce((sum, c) => sum + (c.telechargemements ?? 0), 0)
+  const { data: filieresRaw } = useQuery(filieresService.list)
+  const filieres = (filieresRaw as unknown as Filiere[]) ?? []
+
+  const recentCours = coursItems.slice(0, 4)
+  const recentSujets = sujetsItems.slice(0, 4)
+  const totalCours = coursPagination?.total ?? recentCours.length
+  const totalSujets = sujetsPagination?.total ?? recentSujets.length
+  const totalTelechargements = coursItems.reduce((sum, c) => sum + (c.telechargemements ?? 0), 0)
 
 const greetHour = new Date().getHours()
 const greet = greetHour < 12 ? 'Bonjour' : greetHour < 18 ? 'Bon après-midi' : 'Bonsoir'

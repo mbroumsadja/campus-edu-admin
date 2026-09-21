@@ -1,14 +1,4 @@
 // src/lib/upload.ts
-// Upload direct navigateur → Vercel Blob.
-//
-// Pourquoi : Vercel Functions plafonne le corps de requête à 4,5 Mo.
-// Envoyer plusieurs fichiers en multipart/form-data vers notre API
-// dépasse vite cette limite et provoque un 413. On utilise donc le
-// pattern "client upload" officiel de @vercel/blob : le navigateur
-// envoie chaque fichier DIRECTEMENT à Vercel Blob (jusqu'à 5 To), et
-// notre backend ne fait qu'émettre un jeton signé via
-// POST /api/upload/client-token (voir upload.controller.js).
-// Doc : https://vercel.com/docs/vercel-blob/client-upload
 
 import { upload } from '@vercel/blob/client'
 import { getAccessToken } from './api'
@@ -23,7 +13,6 @@ export interface FichierUploade {
 
 /**
  * Uploade un fichier directement vers Vercel Blob et retourne les
- * métadonnées à envoyer ensuite à notre API (POST /cours, /sujets).
  */
 export async function uploaderFichier(
   file: File,

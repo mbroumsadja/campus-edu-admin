@@ -52,19 +52,28 @@ export default function SujetsPage() {
 
   const isOwner = (sujet: Sujet) => isAdmin || user?.id === sujet.enseignant?.id
 
+  const resetEditSujetState = () => {
+    setEditingSujetId(null)
+    setEditTitre('')
+    setEditSujetFile(null)
+    setEditCorrigeFile(null)
+  }
+
   const openEditSujet = (sujet: Sujet) => {
     setEditingSujetId(sujet.id)
     setEditTitre(sujet.titre)
     setEditSujetType(sujet.type)
     setEditSession(sujet.session)
     setEditAnnee(String(sujet.annee))
+    setEditSujetFile(null)
+    setEditCorrigeFile(null)
   }
 
   const handleDeleteSujet = async (id: number) => {
     if (!window.confirm('Supprimer ce sujet ?')) return
     try {
       await sujetsService.supprimer(id)
-      setEditingSujetId(null)
+      resetEditSujetState()
       refetch()
     } catch (err) {
       console.error('Erreur suppression sujet:', err)
@@ -91,7 +100,7 @@ export default function SujetsPage() {
           annee: Number(editAnnee),
         })
       }
-      setEditingSujetId(null)
+      resetEditSujetState()
       refetch()
     } catch (err) {
       console.error('Erreur modification sujet:', err)
@@ -302,7 +311,7 @@ const handleDownload = async (id: number, corrige = false) => {
                       </div>
 
                       <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end">
-                        <button onClick={() => setEditingSujetId(null)} className="w-full sm:w-auto text-xs px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>Annuler</button>
+                        <button onClick={resetEditSujetState} className="w-full sm:w-auto text-xs px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>Annuler</button>
                         <button onClick={() => handleUpdateSujet(sujet.id)} className="w-full sm:w-auto text-xs px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--brand)', color: 'white' }}>Enregistrer</button>
                       </div>
                     </div>

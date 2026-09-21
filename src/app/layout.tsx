@@ -6,7 +6,8 @@ import { AuthProvider } from '@/lib/auth-context'
 export const metadata: Metadata = {
   title:       'campus-edu',
   description: 'Accédez à vos cours et sujets d\'examen',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || ''),
+///|| 'http://localhost:3000'
   icons: [
     { rel: 'icon', url: '/favicon.ico' },
     { rel: 'icon', url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#0b3f8a',
+  themeColor: '#033375',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

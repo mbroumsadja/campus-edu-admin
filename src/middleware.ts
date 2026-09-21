@@ -1,7 +1,4 @@
 // src/middleware.ts
-// Guard de routes — redirige vers /auth/login si pas de token
-// S'exécute côté serveur AVANT le rendu de la page (Edge Runtime)
-
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
