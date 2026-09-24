@@ -171,22 +171,22 @@ export default function DashboardPage() {
                     Aucun cours disponible
                   </Card>
                 : recentCours.map((c) => (
-                  <Link href={`/cours?ue=${c.ue?.id ?? ''}`} key={c.id}>
-                    <Card className="p-4 hover:translate-y-[-1px] mb-2">
-                      <div className="flex items-start gap-3">
+                  <Link href={`/cours?ue=${c.ue?.id ?? ''}`} key={c.id} className="block w-full min-w-0">
+                    <Card className="p-4 hover:translate-y-[-1px] mb-2 w-full">
+                      <div className="flex items-start gap-3 min-w-0 w-full">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                           style={{ background: '#eef2ff' }}>
                           <BookOpen size={16} style={{ color: 'var(--brand)' }} />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-800 truncate">{c.titre}</p>
-                          <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-3)' }}>
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <p className="text-sm font-medium text-gray-800 break-words">{c.titre}</p>
+                          <p className="text-xs mt-0.5 break-words" style={{ color: 'var(--text-3)' }}>
                             {c.ue?.intitule ?? 'UE inconnue'} · {c.anneAcademique}
                           </p>
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
                             <TypeCoursBADGE type={c.type} />
                             <StatutBadge statut={c.statut} />
-                            <span className="flex items-center gap-1 text-xs ml-auto"
+                            <span className="ml-auto flex items-center gap-1 text-xs shrink-0"
                               style={{ color: 'var(--text-3)' }}>
                               <Eye size={12} /> {c.vues}
                             </span>
@@ -219,19 +219,19 @@ export default function DashboardPage() {
                     Aucun sujet disponible
                   </Card>
                 : recentSujets.map((s) => (
-                  <Link href={`/sujets?ue=${s.ue?.id ?? ''}`} key={s.id}>
-                    <Card className="p-4 hover:translate-y-[-1px] mb-2">
-                      <div className="flex items-start gap-3">
+                  <Link href={`/sujets?ue=${s.ue?.id ?? ''}`} key={s.id} className="block w-full min-w-0">
+                    <Card className="p-4 hover:translate-y-[-1px] mb-2 w-full">
+                      <div className="flex items-start gap-3 min-w-0 w-full">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                           style={{ background: '#ecfeff' }}>
                           <FileText size={16} style={{ color: '#0891b2' }} />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-800 truncate">{s.titre}</p>
-                          <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-3)' }}>
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <p className="text-sm font-medium text-gray-800 break-words">{s.titre}</p>
+                          <p className="text-xs mt-0.5 break-words" style={{ color: 'var(--text-3)' }}>
                             {s.ue?.intitule ?? 'UE inconnue'} · {s.annee}
                           </p>
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
                             <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                               style={{ background: '#f1f5f9', color: '#475569' }}>
                               {s.type}
@@ -242,7 +242,7 @@ export default function DashboardPage() {
                                 + Corrigé
                               </span>
                             )}
-                            <span className="flex items-center gap-1 text-xs ml-auto"
+                            <span className="ml-auto flex items-center gap-1 text-xs shrink-0"
                               style={{ color: 'var(--text-3)' }}>
                               <Download size={12} /> {s.telechargements}
                             </span>
