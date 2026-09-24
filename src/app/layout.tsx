@@ -3,11 +3,12 @@ import type { Metadata, Viewport } from 'next'
 import '@/styles/globals.css'
 import { AuthProvider } from '@/lib/auth-context'
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
 export const metadata: Metadata = {
   title:       'campus-edu',
   description: 'Accédez à vos cours et sujets d\'examen',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || ''),
-///|| 'http://localhost:3000'
+  metadataBase: new URL(appUrl),
   icons: [
     { rel: 'icon', url: '/favicon.ico' },
     { rel: 'icon', url: '/icon-192.png', sizes: '192x192', type: 'image/png' },

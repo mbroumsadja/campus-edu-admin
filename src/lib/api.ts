@@ -3,9 +3,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import Cookies from 'js-cookie'
 
-const BASE_URL = (process.env.NEXT_PUBLIC_API_URL)
-
-//|| 'http://localhost:3000/api').replace(/\/+$/, ''
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api').replace(/\/+$/, '')
 
 // ── Instance principale ────────────────────────────────────────────
 export const api = axios.create({
