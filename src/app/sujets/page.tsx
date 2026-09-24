@@ -223,7 +223,7 @@ const handleDownload = async (id: number, corrige = false) => {
             {items.map((sujet, idx) => {
               const sessionStyle = SESSION_COLORS[sujet.session] ?? SESSION_COLORS.normale
               return (
-                <Card key={sujet.id} className="p-5 flex flex-col gap-3 hover:translate-y-[-2px] animate-fade-up"
+                <Card key={sujet.id} className="p-4 sm:p-5 flex flex-col gap-3 hover:translate-y-[-2px] animate-fade-up min-w-0 overflow-hidden w-full"
                   >
 
                   {/* Header */}
@@ -232,10 +232,10 @@ const handleDownload = async (id: number, corrige = false) => {
                       style={{ background: sessionStyle.bg }}>
                       <FileText size={18} style={{ color: sessionStyle.color }} />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">{sujet.titre}</h3>
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 break-words">{sujet.titre}</h3>
                       {sujet.ue && (
-                        <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>
+                        <p className="text-xs mt-0.5 break-words" style={{ color: 'var(--text-3)' }}>
                           <span style={{ fontFamily: 'var(--font-mono)' }}>{sujet.ue.code}</span>
                           {' · '}{sujet.ue.intitule}
                         </p>
@@ -337,20 +337,20 @@ const handleDownload = async (id: number, corrige = false) => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 pt-2 mt-auto"
+                  <div className="flex flex-wrap items-center gap-2 pt-2 mt-auto"
                     style={{ borderTop: '1px solid var(--border)' }}>
                     <span className="flex items-center gap-1 text-xs mr-auto"
                       style={{ color: 'var(--text-3)' }}>
                       <Download size={11} /> {sujet.telechargements}
                     </span>
                     <button onClick={() => handleDownload(sujet.id)}
-                      className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                      className="flex items-center gap-1 text-[10px] sm:text-xs font-medium px-2.5 sm:px-3 py-1.5 rounded-lg transition-all"
                       style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}>
                       <Download size={11} /> Sujet
                     </button>
                     {sujet.avecCorrige && (
                       <button onClick={() => handleDownload(sujet.id, true)}
-                        className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                        className="flex items-center gap-1 text-[10px] sm:text-xs font-medium px-2.5 sm:px-3 py-1.5 rounded-lg transition-all"
                         style={{ background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>
                         <Download size={11} /> Corrigé
                       </button>

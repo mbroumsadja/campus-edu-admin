@@ -1,8 +1,4 @@
 // src/lib/api.ts
-// Client Axios centralisé avec :
-//   - Injection automatique du token JWT
-//   - Refresh automatique du token expiré (intercepteur)
-//   - Gestion des erreurs globale
 
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import Cookies from 'js-cookie'

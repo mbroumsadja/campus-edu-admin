@@ -2,13 +2,13 @@
 // src/app/dashboard/page.tsx
 
 import { useAuth } from '@/lib/auth-context'
-import { coursService, sujetsService, filieresService } from '@/lib/api'
-import { usePaginatedQuery, useQuery } from '@/hooks/useQuery'
+import { coursService, sujetsService } from '@/lib/api'
+import { usePaginatedQuery } from '@/hooks/useQuery'
 import AppShell from '@/components/layout/AppShell'
 import { Card, StatutBadge, TypeCoursBADGE, SkeletonCard } from '@/components/ui'
-import { BookOpen, FileText, Download, Eye, ArrowRight, GraduationCap } from 'lucide-react'
+import { BookOpen, FileText, Download, Eye, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import type { Cours, Filiere, Sujet } from '@/types'
+import type { Cours, Sujet } from '@/types'
 
 const normalizePaginatedResponse = <T,>(payload: unknown) => {
   const source = payload && typeof payload === 'object' ? payload as Record<string, unknown> : {}
@@ -41,7 +41,7 @@ const normalizePaginatedResponse = <T,>(payload: unknown) => {
 }
 
 export default function DashboardPage() {
-  const { user, isAdmin, isEnseignant } = useAuth()
+  const { user } = useAuth()
 
   const {
     items: coursItems,
@@ -61,25 +61,68 @@ export default function DashboardPage() {
     return { data: normalizePaginatedResponse<Sujet>(response.data) }
   })
 
-  const { data: filieresRaw } = useQuery(async () => {
-    const response = await filieresService.list()
-    return { data: { data: Array.isArray(response.data) ? response.data : response.data?.data ?? [] } }
-  })
-  const filieres = (filieresRaw as unknown as Filiere[]) ?? []
-
   const recentCours = coursItems.slice(0, 4)
   const recentSujets = sujetsItems.slice(0, 4)
   const totalCours = coursPagination?.total ?? recentCours.length
   const totalSujets = sujetsPagination?.total ?? recentSujets.length
-  const totalTelechargements = coursItems.reduce((sum, c) => sum + (c.telechargemements ?? 0), 0)
+ const totalTelechargements =
+   coursItems.reduce((sum, c) => sum + (c.telechargemements ?? 0), 0) +
+   sujetsItems.reduce((sum, s) => sum + (s.telechargements ?? 0), 0)
+ const totalVuesCours = coursItems.reduce((sum, c) => sum + (c.vues ?? 0), 0)
+ const totalVuesSujets = sujetsItems.reduce((sum, s) => sum + (s.vues ?? 0), 0)
+ const moyenneVuesParCours = coursItems.length ? Math.round(totalVuesCours / coursItems.length) : 0
+ const moyenneVuesParSujet = sujetsItems.length ? Math.round(totalVuesSujets / sujetsItems.length) : 0
 
-const greetHour = new Date().getHours()
-const greet = greetHour < 12 ? 'Bonjour' : greetHour < 18 ? 'Bon après-midi' : 'Bonsoir'
- 
-  return (
-    <AppShell>
-      {/* Header */}
-      <div className="mb-8 animate-fade-up">
+ const greetHour = new Date().getHours()
+ const greet = greetHour < 12 ? 'Bonjour' : greetHour < 18 ? 'Bon après-midi' : 'Bonsoir'
+
+ const stats = [
+   {
+     label: 'Cours disponibles',
+     value: cLoading ? '…' : totalCours,
+     icon: BookOpen,
+     color: '#5b5ef4',
+     bg: '#eef2ff',
+     delay: 0,
+   },
+   {
+     label: 'Anciens sujets',
+     value: sLoading ? '…' : totalSujets,
+     icon: FileText,
+     color: '#0891b2',
+     bg: '#ecfeff',
+     delay: 100,
+   },
+   {
+     label: 'Vues / cours',
+     value: cLoading ? '…' : moyenneVuesParCours,
+     icon: Eye,
+     color: '#f59e0b',
+     bg: '#fffbeb',
+     delay: 200,
+   },
+   {
+     label: 'Vues / sujet',
+     value: sLoading ? '…' : moyenneVuesParSujet,
+     icon: Eye,
+     color: '#ef4444',
+     bg: '#fef2f2',
+     delay: 300,
+   },
+   {
+     label: 'Total téléchargements',
+     value: (cLoading || sLoading) ? '…' : totalTelechargements,
+     icon: Download,
+     color: '#059669',
+     bg: '#ecfdf5',
+     delay: 400,
+   },
+ ]
+
+ return (
+   <AppShell>
+     {/* Header */}
+     <div className="mb-8 animate-fade-up">
         <h1 className="font-display text-2xl font-bold text-gray-900">
           {greet}, {user?.prenom} 👋
         </h1>
@@ -90,48 +133,9 @@ const greet = greetHour < 12 ? 'Bonjour' : greetHour < 18 ? 'Bon après-midi' : 
         </p>
       </div>
 
-        {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
-          {
-            label: 'Cours disponibles',
-            value: cLoading ? '…' : totalCours,
-            icon:  BookOpen,
-            color: '#5b5ef4',
-            bg:    '#eef2ff',
-            delay: 0,
-            roles:["enseignant","admin"]
-          },
-          {
-            label: 'Anciens sujets',
-            value: sLoading ? '…' : totalSujets,
-            icon:  FileText,
-            color: '#0891b2',
-            bg:    '#ecfeff',
-            delay: 100,
-            roles:["enseignant","admin"]
-          },
-          {
-            label: isAdmin ? 'Filières' : 'Votre niveau',
-            value: isAdmin
-              ? ((filieres as unknown[])?.length ?? 0)
-              : (user?.niveau ?? '—'),
-            icon:  GraduationCap,
-            color: '#7c3aed',
-            bg:    '#f5f3ff',
-            delay: 200,
-            roles:["enseignant","admin"]
-          },
-          {
-            label: 'Total téléchargements',
-            value: cLoading ? '…' : totalTelechargements,
-            icon:  Download,
-            color: '#059669',
-            bg:    '#ecfdf5',
-            delay: 300,
-            roles:["enseignant","admin"]
-          },
-        ].map(({ label, value, icon: Icon, color, bg, delay,roles }) => (
+      {/* Stats */}
+      <div className="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-8">
+        {stats.map(({ label, value, icon: Icon, color, bg, delay }) => (
           <Card key={label} className={`p-5 animate-fade-up animate-delay-${delay}`}>
             <div className="flex items-center justify-between mb-3">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center"

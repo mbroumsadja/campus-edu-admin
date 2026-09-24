@@ -193,8 +193,8 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
         <>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {items.map((cours, idx) => (
-              <Card key={cours.id} className="p-3 hover:translate-y-[-2px] animate-fade-up">
-                <div className="flex flex-col gap-3" style={{ animationDelay: `${idx * 40}ms` }}>
+              <Card key={cours.id} className="p-3 sm:p-4 hover:translate-y-[-2px] animate-fade-up min-w-0 overflow-hidden w-full">
+                <div className="flex flex-col gap-3 min-w-0" style={{ animationDelay: `${idx * 40}ms` }}>
 
                 {/* Header */}
                 <div className="flex items-start gap-3">
@@ -202,12 +202,12 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
                     style={{ background: '#eef2ff' }}>
                     <BookOpen size={18} style={{ color: 'var(--brand)' }} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-gray-800 leading-snug line-clamp-2">
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <h3 className="text-sm font-semibold text-gray-800 leading-snug line-clamp-2 break-words">
                       {cours.titre}
                     </h3>
                     {cours.enseignant && (
-                      <p className="text-xs mt-1" style={{ color: 'var(--text-3)' }}>
+                      <p className="text-xs mt-1 break-words" style={{ color: 'var(--text-3)' }}>
                         {cours.enseignant.prenom} {cours.enseignant.nom}
                       </p>
                     )}
@@ -276,7 +276,7 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
 
                 {/* UE info */}
                 {cours.ue && (
-                  <div className="px-3 py-2 rounded-lg text-xs"
+                  <div className="px-3 py-2 rounded-lg text-xs min-w-0 overflow-hidden break-words"
                     style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
                     <span className="font-medium" style={{ fontFamily: 'var(--font-mono)' }}>
                       {cours.ue.code}
@@ -295,7 +295,7 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
                 </div>
                 {/* Stats + Télécharger */}
                {/* Stats */}
-                <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--text-3)' }}>
+                <div className="flex flex-wrap items-center gap-2 text-xs" style={{ color: 'var(--text-3)' }}>
                   <span className="flex items-center gap-1"><Eye size={12} />{cours.vues}</span>
                   <span className="flex items-center gap-1"><Download size={12} />{cours.telechargemements}</span>
                 </div>
@@ -333,7 +333,7 @@ const handleDownload = async (coursId: number, documentId: number, titre: string
                               background: 'var(--brand)', color: 'white',
                               boxShadow: '0 2px 6px rgba(91,94,244,.3)'
                             }}>
-                            <Download size={11} />
+                            <Download size={11} className='p-2'/> Télécharger
                           </button>
                         </div>
                       )

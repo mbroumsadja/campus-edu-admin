@@ -106,7 +106,8 @@ export interface Sujet {
   annee:             number
   avecCorrige:       boolean
   statut:            'en_attente'|'publie'|'archive'
-  telechargements: number
+  vues?:             number
+  telechargements:   number
   ue?:               UE
   enseignant?:       Pick<Utilisateur, 'id'|'nom'|'prenom'>
   createdAt:         string

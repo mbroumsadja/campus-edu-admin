@@ -34,7 +34,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* ── BARRE 1 : Logo + Profil ── */}
       <header
-        className="flex items-center justify-between px-6 h-14 flex-shrink-0 round1"
+        className="hidden md:flex items-center justify-between px-6 h-14 flex-shrink-0 round1"
         style={{
           background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand-strong) 100%)',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -169,7 +169,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
             {menuOpen && (
               <div
-                className="absolute right-0 bottom-full mb-3 w-48 rounded-2xl overflow-hidden shadow-2xl"
+                className="absolute right-0 bottom-full mb-3 w-56 rounded-2xl overflow-hidden shadow-2xl"
                 style={{ background: 'var(--brand-strong)', border: '1px solid rgba(255,255,255,0.08)' }}
               >
                 {[...navMain, ...(isAdmin ? navAdmin : [])].map(({ href, label, icon: Icon }) => (
@@ -187,6 +187,24 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <Icon size={14} /> {label}
                   </Link>
                 ))}
+
+                <div className="border-t border-white/10" />
+
+                <Link
+                  href="/profil"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2.5 text-sm text-white/80 hover:bg-white/5 transition-colors"
+                >
+                  <User size={14} /> Mon profil
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => { setMenuOpen(false); logout() }}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-red-300 hover:bg-white/5 transition-colors"
+                >
+                  <LogOut size={14} /> Se déconnecter
+                </button>
               </div>
             )}
           </div>
